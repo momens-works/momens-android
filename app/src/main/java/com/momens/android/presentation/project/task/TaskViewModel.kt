@@ -15,6 +15,7 @@ import com.momens.android.presentation.project.task.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,12 +42,15 @@ class TaskViewModel @Inject constructor(
         initialValue = projectManager.currentProjectContext,
     )
 
-    val projectId = projectContext.value.projectId.toString()
+    private var loadBoardJob: Job? = null
 
-    fun loadTaskBoard() {
+    fun loadTaskBoard(projectId: String) {
+
+        loadBoardJob?.cancel()
+
         _uiState.value = UiState.Loading
 
-        viewModelScope.launch {
+        loadBoardJob = viewModelScope.launch {
             taskRepository.getTaskBoard(projectId)
                 .mapCatching { board -> board.toUiModel() }
                 .onSuccess { content ->
@@ -64,6 +68,8 @@ class TaskViewModel @Inject constructor(
         role: MomensTaskButtonType,
         priority: ImportantLevel,
     ) {
+        val projectId = projectContext.value.projectId ?: return
+
         viewModelScope.launch {
             val previousBoard = (_uiState.value as? UiState.Success)?.data
             _uiState.value = UiState.Loading

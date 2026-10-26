@@ -28,7 +28,7 @@ import com.momens.android.core.designsystem.theme.MomensTheme
 @Composable
 fun TaskListItem(
     text: String,
-    label: String,
+    label: String?,
     level: ImportantLevel,
     tone: ImportantTone,
     count: String,
@@ -61,9 +61,9 @@ fun TaskListItem(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaskListItemLabel(
-                    label = label
-                )
+                label?.let {
+                    TaskListItemLabel(label = it)
+                }
 
                 MomensImportantStatus(level = level, tone = tone)
 
