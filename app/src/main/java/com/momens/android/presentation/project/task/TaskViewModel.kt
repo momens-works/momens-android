@@ -15,6 +15,7 @@ import com.momens.android.presentation.project.task.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,10 +42,15 @@ class TaskViewModel @Inject constructor(
         initialValue = projectManager.currentProjectContext,
     )
 
+    private var loadBoardJob: Job? = null
+
     fun loadTaskBoard(projectId: String) {
+
+        loadBoardJob?.cancel()
+
         _uiState.value = UiState.Loading
 
-        viewModelScope.launch {
+        loadBoardJob = viewModelScope.launch {
             taskRepository.getTaskBoard(projectId)
                 .mapCatching { board -> board.toUiModel() }
                 .onSuccess { content ->
