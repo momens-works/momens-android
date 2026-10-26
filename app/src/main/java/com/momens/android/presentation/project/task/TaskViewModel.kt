@@ -41,9 +41,7 @@ class TaskViewModel @Inject constructor(
         initialValue = projectManager.currentProjectContext,
     )
 
-    val projectId = projectContext.value.projectId.toString()
-
-    fun loadTaskBoard() {
+    fun loadTaskBoard(projectId: String) {
         _uiState.value = UiState.Loading
 
         viewModelScope.launch {
@@ -64,6 +62,8 @@ class TaskViewModel @Inject constructor(
         role: MomensTaskButtonType,
         priority: ImportantLevel,
     ) {
+        val projectId = projectContext.value.projectId ?: return
+
         viewModelScope.launch {
             val previousBoard = (_uiState.value as? UiState.Success)?.data
             _uiState.value = UiState.Loading

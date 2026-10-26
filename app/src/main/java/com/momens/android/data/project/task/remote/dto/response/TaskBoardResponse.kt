@@ -22,7 +22,7 @@ data class TaskGroupResponse(
 data class TaskResponse(
     @SerialName("id") val id: String,
     @SerialName("title") val title: String,
-    @SerialName("role") val role: String,
+    @SerialName("role") val role: String?,
     @SerialName("priority") val priority: String,
     @SerialName("material_count") val materialCount: Int,
 )

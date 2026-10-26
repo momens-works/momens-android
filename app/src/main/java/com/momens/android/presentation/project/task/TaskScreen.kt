@@ -52,8 +52,8 @@ fun TaskRoute(
     val renderState = rememberMinDurationUiState(uiState)
     var pendingActionSnackbar by remember { mutableStateOf<SnackbarState?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadTaskBoard()
+    LaunchedEffect(projectContext.projectId) {
+        projectContext.projectId?.let(viewModel::loadTaskBoard)
     }
 
     LaunchedEffect(viewModel) {

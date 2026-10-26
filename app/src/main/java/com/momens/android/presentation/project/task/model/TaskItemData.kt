@@ -10,7 +10,7 @@ import com.momens.android.data.project.task.model.TaskItem
 data class TaskItemData(
     val id: String,
     val title: String,
-    val role: MomensTaskButtonType,
+    val role: MomensTaskButtonType?,
     val priority: ImportantLevel,
     val materialCount: Int,
     val tone: ImportantTone,
@@ -21,7 +21,7 @@ private const val TITLE_MAX_LENGTH = 15
 fun TaskItem.toUiModel(): TaskItemData = TaskItemData(
     id = id,
     title = title.limitLength(TITLE_MAX_LENGTH),
-    role = role.toButtonType(),
+    role = role?.toButtonType(),
     priority = priority.toImportantLevel(),
     materialCount = materialCount,
     tone = ImportantTone.WHITE,
