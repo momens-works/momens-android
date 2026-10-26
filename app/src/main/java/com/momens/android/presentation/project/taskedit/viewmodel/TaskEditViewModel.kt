@@ -41,10 +41,9 @@ class TaskEditViewModel @Inject constructor(
     private val taskEditRepository: TaskEditRepository,
     taskDetailRepository: TaskDetailRepository,
 ) : ViewModel() {
-
     val projectContext = projectManager.observeProjectContext().stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+        started = SharingStarted.Eagerly,
         initialValue = projectManager.currentProjectContext,
     )
 
