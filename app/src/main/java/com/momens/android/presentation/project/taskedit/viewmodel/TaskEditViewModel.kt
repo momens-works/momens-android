@@ -188,10 +188,6 @@ class TaskEditViewModel @Inject constructor(
         }
     }
 
-    fun clearAssignees() {
-        _state.update { it.copy(assignees = persistentListOf()) }
-    }
-
     fun navigateUp() {
         viewModelScope.launch {
             _sideEffect.emit(TaskEditSideEffect.NavigateUp)
