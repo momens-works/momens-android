@@ -59,7 +59,7 @@ private fun TaskPriorityModel.toUiType(): ImportantLevel = when (this) {
     TaskPriorityModel.LOW -> ImportantLevel.LOW
     TaskPriorityModel.MEDIUM -> ImportantLevel.MEDIUM
     TaskPriorityModel.HIGH -> ImportantLevel.HIGH
-    TaskPriorityModel.URGENT -> ImportantLevel.HIGH
+    TaskPriorityModel.URGENT -> ImportantLevel.URGENT
 }
 
 private fun TaskRoleModel.toUiType(): TaskRole = when (this) {
