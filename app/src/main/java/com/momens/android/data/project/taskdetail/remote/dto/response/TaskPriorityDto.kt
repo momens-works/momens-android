@@ -13,4 +13,7 @@ enum class TaskPriorityDto {
 
     @SerialName("high")
     HIGH,
+
+    @SerialName("urgent")
+    URGENT,
 }
