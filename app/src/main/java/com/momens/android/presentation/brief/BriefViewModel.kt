@@ -90,7 +90,12 @@ class BriefViewModel @Inject constructor(
                         "filter=$filter, cursor=null, response=$response",
                 )
                 _uiState.updateSuccess { state ->
-                    if (state.signalSummary.selectedFilterType != filterType) return@updateSuccess state
+                    if (
+                        state.project.id != currentState.project.id ||
+                        state.signalSummary.selectedFilterType != filterType
+                    ) {
+                        return@updateSuccess state
+                    }
 
                     state.copy(
                         signalSummary = state.signalSummary.copy(
@@ -147,6 +152,7 @@ class BriefViewModel @Inject constructor(
                 _uiState.updateSuccess { state ->
                     val currentSummary = state.signalSummary
                     if (
+                        state.project.id != currentState.project.id ||
                         currentSummary.selectedFilterType != signalSummary.selectedFilterType ||
                         currentSummary.nextCursor != nextCursor
                     ) {
