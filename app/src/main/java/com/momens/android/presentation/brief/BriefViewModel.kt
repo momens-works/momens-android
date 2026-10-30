@@ -12,6 +12,7 @@ import com.momens.android.presentation.brief.model.toUiModel
 import com.momens.android.presentation.brief.state.BriefUiState
 import com.momens.android.presentation.brief.state.toUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +71,8 @@ class BriefViewModel @Inject constructor(
             state.copy(
                 signalSummary = state.signalSummary.copy(
                     selectedFilterType = filterType,
+                    items = persistentListOf(),
+                    nextCursor = null,
                     isExpanded = false,
                 ),
             )
