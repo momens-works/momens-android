@@ -13,6 +13,7 @@ import com.momens.android.presentation.brief.state.BriefUiState
 import com.momens.android.presentation.brief.state.toUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,7 @@ class BriefViewModel @Inject constructor(
     private val briefRepository: BriefRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<BriefUiState>>(UiState.Loading)
+    private var signalFilterJob: Job? = null
     private var isLoadingMoreSignalSummary = false
 
     val uiState: StateFlow<UiState<BriefUiState>> = _uiState.asStateFlow()
@@ -63,7 +65,17 @@ class BriefViewModel @Inject constructor(
         val currentState = (_uiState.value as? UiState.Success)?.data ?: return
         val filter = filterType.toApiFilter()
 
-        viewModelScope.launch {
+        signalFilterJob?.cancel()
+        _uiState.updateSuccess { state ->
+            state.copy(
+                signalSummary = state.signalSummary.copy(
+                    selectedFilterType = filterType,
+                    isExpanded = false,
+                ),
+            )
+        }
+
+        signalFilterJob = viewModelScope.launch {
             briefRepository.getSignalSummary(
                 projectId = currentState.project.id,
                 filter = filter,
@@ -75,6 +87,8 @@ class BriefViewModel @Inject constructor(
                         "filter=$filter, cursor=null, response=$response",
                 )
                 _uiState.updateSuccess { state ->
+                    if (state.signalSummary.selectedFilterType != filterType) return@updateSuccess state
+
                     state.copy(
                         signalSummary = state.signalSummary.copy(
                             selectedFilterType = filterType,
@@ -114,8 +128,9 @@ class BriefViewModel @Inject constructor(
                 "filter=$filter, cursor=$nextCursor",
         )
 
+        isLoadingMoreSignalSummary = true
+
         viewModelScope.launch {
-            isLoadingMoreSignalSummary = true
             briefRepository.getSignalSummary(
                 projectId = currentState.project.id,
                 filter = filter,
@@ -127,10 +142,18 @@ class BriefViewModel @Inject constructor(
                         "filter=$filter, cursor=$nextCursor, response=$response",
                 )
                 _uiState.updateSuccess { state ->
+                    val currentSummary = state.signalSummary
+                    if (
+                        currentSummary.selectedFilterType != signalSummary.selectedFilterType ||
+                        currentSummary.nextCursor != nextCursor
+                    ) {
+                        return@updateSuccess state
+                    }
+
                     state.copy(
-                        signalSummary = state.signalSummary.copy(
+                        signalSummary = currentSummary.copy(
                             items = (
-                                state.signalSummary.items +
+                                currentSummary.items +
                                     response.items.map { item -> item.toUiModel() }
                                 ).toImmutableList(),
                             nextCursor = response.nextCursor,
