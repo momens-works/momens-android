@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.momens.android.core.designsystem.component.type.ImportantLevel
 import com.momens.android.core.designsystem.component.type.MomensStatusEditType
+import com.momens.android.core.local.project.ProjectManager
 import com.momens.android.data.project.taskdetail.repository.TaskDetailRepository
 import com.momens.android.data.project.taskedit.repository.TaskEditRepository
 import com.momens.android.presentation.project.model.Assignee
@@ -24,8 +25,10 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -33,12 +36,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskEditViewModel @Inject constructor(
+    projectManager: ProjectManager,
     savedStateHandle: SavedStateHandle,
     private val taskEditRepository: TaskEditRepository,
     taskDetailRepository: TaskDetailRepository,
 ) : ViewModel() {
-    private val taskId: String = savedStateHandle.toRoute<TaskEdit>().taskId
+    val projectContext = projectManager.observeProjectContext().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = projectManager.currentProjectContext,
+    )
 
+    private val taskId: String = savedStateHandle.toRoute<TaskEdit>().taskId
     private val initialTask = taskDetailRepository.cachedTaskDetail.value!!.toUiModel().toEditTask()
 
     private val _state = MutableStateFlow(
@@ -154,8 +163,13 @@ class TaskEditViewModel @Inject constructor(
 
     fun getAssignees(search: String) {
         viewModelScope.launch {
+            val projectId = projectContext.value.projectId ?: run {
+                _sideEffect.emit(TaskEditSideEffect.ShowSnackBar(message = "프로젝트 정보를 불러오지 못했습니다."))
+                return@launch
+            }
+
             taskEditRepository.getTaskEditMembers(
-                projectId = "a0000000-0000-4000-8000-000000000003",
+                projectId = projectId,
                 query = search.ifBlank { null },
             ).onSuccess { response ->
                 _state.update {
