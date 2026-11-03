@@ -546,6 +546,40 @@ UiState.Failure -> Unit
 ./gradlew ktlintFormat
 ```
 
+### 운영체제별 실행과 문제 확인
+
+Gradle Wrapper를 사용하면 ktlint와 Gradle 버전이 팀원마다 달라지는 것을 막을 수 있습니다.
+
+| 환경 | 검사 | 자동 포맷 |
+| --- | --- | --- |
+| macOS / Linux 터미널 | `./gradlew :app:ktlintCheck` | `./gradlew :app:ktlintFormat` |
+| Windows PowerShell / 명령 프롬프트 | `.\gradlew.bat :app:ktlintCheck` | `.\gradlew.bat :app:ktlintFormat` |
+| Windows Git Bash | `./gradlew :app:ktlintCheck` | `./gradlew :app:ktlintFormat` |
+
+처음 실행하는 환경에서는 Gradle Wrapper와 Java 21 toolchain을 내려받을 수 있으므로
+인터넷 연결이 필요합니다. 사내·학교 네트워크, 프록시 또는 오프라인 환경에서는 다운로드가
+실패해 ktlint 작업까지 도달하지 못할 수 있습니다.
+
+ktlint가 실행되지 않으면 다음처럼 stacktrace를 포함해 실행하고, 실패 메시지의 앞부분을
+공유합니다.
+
+```bash
+# macOS / Linux / Windows Git Bash
+./gradlew :app:ktlintCheck --stacktrace
+
+# Windows PowerShell / 명령 프롬프트
+.\gradlew.bat :app:ktlintCheck --stacktrace
+```
+
+다음 메시지는 ktlint 규칙 문제가 아니라 개발 환경 문제일 가능성이 높습니다.
+
+- `JAVA_HOME`, `toolchain`: Java 21 탐색 또는 다운로드 실패
+- `Could not resolve`, `SSL`, `proxy`: Gradle 또는 toolchain 다운로드 네트워크 문제
+- `Access denied`: Gradle 캐시 또는 프로젝트 파일 권한 문제
+
+Android Studio의 **Reformat Code** 결과가 ktlint와 항상 같지는 않습니다. 프로젝트 루트의
+`.editorconfig`를 적용하되, 최종 포맷 기준은 Gradle `ktlintCheck` 결과로 통일합니다.
+
 ---
 
 ## 14. API 연결 전 작업 흐름
