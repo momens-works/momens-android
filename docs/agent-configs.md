@@ -2,7 +2,7 @@
 
 Momens Android 프로젝트에서 사용하는 AI 에이전트 설정을 설명합니다.
 
-이 문서는 TOML 설정 파일을 직접 읽지 않아도, 어떤 에이전트를 언제 어떻게 사용하면 되는지 알 수 있도록 정리한 사용자용 가이드입니다.
+이 문서는 에이전트 설정 파일을 직접 읽지 않아도, 어떤 에이전트를 언제 어떻게 사용하면 되는지 알 수 있도록 정리한 사용자용 가이드입니다.
 
 ## 문서 구조
 
@@ -14,26 +14,28 @@ Momens Android 프로젝트에서 사용하는 AI 에이전트 설정을 설명�
 └── pr-writer.toml
 
 .claude/agents/
-├── momens-explorer.toml
-├── momens-reviewer.toml
-├── code-reviewer.toml
-└── pr-writer.toml
+├── momens-explorer.md
+├── momens-reviewer.md
+├── code-reviewer.md
+└── pr-writer.md
 ```
 
-Codex와 Claude 폴더에는 같은 이름의 에이전트 설정이 들어 있습니다.
+Codex와 Claude Code 폴더에는 같은 역할의 에이전트 설정이 들어 있습니다.
 
-현재 같은 이름의 파일은 내용도 동일합니다. 따라서 사용하는 도구에 맞는 폴더의 설정을 사용하면 됩니다.
+Codex는 TOML 설정을 사용하고, Claude Code는 YAML frontmatter가 있는 Markdown 설정을 사용합니다.
+
+Claude Code는 `.claude/agents/` 안의 Markdown 파일만 프로젝트 에이전트로 자동 등록합니다. 따라서 해당 폴더에서는 `.toml`이 아닌 `.md` 파일을 사용합니다.
 
 ## 에이전트 목록
 
-| 에이전트 | 파일 | 목적 |
-| --- | --- | --- |
-| `momens_explorer` | `momens-explorer.toml` | 구현 전에 관련 코드 구조와 흐름을 읽기 전용으로 탐색 |
-| `momens_reviewer` | `momens-reviewer.toml` | Momens Compose 규칙을 기준으로 화면 구현을 리뷰 |
-| `code_reviewer` | `code-reviewer.toml` | PR 리뷰처럼 correctness, architecture, test risk를 넓게 점검 |
-| `pr_writer` | `pr-writer.toml` | PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성 |
+| 에이전트 | Codex 파일 | Claude Code 파일 | 목적 |
+| --- | --- | --- | --- |
+| `momens_explorer` | `momens-explorer.toml` | `momens-explorer.md` | 구현 전에 관련 코드 구조와 흐름을 읽기 전용으로 탐색 |
+| `momens_reviewer` | `momens-reviewer.toml` | `momens-reviewer.md` | Momens Compose 규칙을 기준으로 화면 구현을 리뷰 |
+| `code_reviewer` | `code-reviewer.toml` | `code-reviewer.md` | PR 리뷰처럼 correctness, architecture, test risk를 넓게 점검 |
+| `pr_writer` | `pr-writer.toml` | `pr-writer.md` | PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성 |
 
-네 에이전트는 모두 읽기 전용입니다.
+네 에이전트는 모두 읽기 전용입니다. Claude Code 설정은 `Read`, `Glob`, `Grep`, `Bash`만 허용하고 `permissionMode: plan`을 사용하므로 파일을 수정하거나 쓰지 않습니다.
 
 파일을 직접 수정하지 않고, 코드 구조를 설명하거나 리뷰 의견을 제공합니다.
 
