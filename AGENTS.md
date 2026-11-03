@@ -56,8 +56,10 @@ stop and ask before changing code.
 - Follow Route / Screen / Component responsibilities. Reusable components must
   not reference a ViewModel or NavController.
 - Prefer existing design-system components and `MomensTheme`.
-- Add or update a Preview for a new Composable or meaningful UI state. If that
-  is impractical, explain why in the PR.
+- Add or update a Preview for a new screen, reusable Composable, or visual
+  state branch such as Loading, Empty, Error, or selection. A simple text,
+  color, or spacing change can use an existing representative Preview.
+- If a required Preview is impractical, explain why in the PR.
 
 ## Validation
 
@@ -69,6 +71,8 @@ stop and ask before changing code.
 - Run the smallest relevant test set when tests exist.
 - If no relevant automated test exists, state that and record the validation
   that did run in the PR.
+- Documentation-only changes: run `git diff --check`. When changing a link,
+  file path, or command, verify that its target exists or the command is valid.
 - Use the platform-appropriate Gradle Wrapper command from
   `docs/development/ktlint-environment.md`; it contains the exact macOS, Linux, and
   Windows commands. Gradle `ktlintCheck` is the final formatting authority,

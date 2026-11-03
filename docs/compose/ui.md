@@ -27,6 +27,9 @@
 - Preview에서 실제 ViewModel, Repository, Network, Hilt를 사용하지 않습니다.
 - `Screen`은 fake data가 아니라 `XxxUiState`를 받고, fake는 companion object 또는
   Preview 근처 private 값으로 관리합니다.
+- 새 화면, 재사용 Composable, Loading/Empty/Error/선택 상태 분기를 추가하면 해당 상태를
+  확인할 Preview를 추가하거나 갱신합니다.
+- 단순 문구, 색상, 간격 변경은 대표 Preview가 이미 있으면 새 Preview를 만들지 않아도 됩니다.
 
 ```kotlin
 @Preview(showBackground = true)
