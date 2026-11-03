@@ -18,6 +18,8 @@ Important project context:
 - Compose work should follow the Momens Android guide in `.agents/.skills/momens-android/`.
 - General Compose rules are documented in `.agents/.skills/momens-android/references/compose-basic-flow.md`.
 - Momens-specific rules are documented in `.agents/.skills/momens-android/references/momens-project-flow.md`.
+- Read `AGENTS.md` first, then use `docs/compose/README.md` to select any
+  relevant project-specific Compose guide.
 
 Review checklist:
 - Is state owned by ViewModel rather than Composable?
