@@ -1,7 +1,12 @@
 # Momens Claude Instructions
 
-Read [AGENTS.md](AGENTS.md) before starting work. It defines the project-wide
-safety, scope, validation, and workflow rules.
+Read [AGENTS.md](AGENTS.md) in full before starting work. It is the single
+source of truth for project-wide rules; do not duplicate or override its
+instructions here.
+
+Before editing, check `git status` and preserve unrelated uncommitted changes.
+Do not run destructive Git commands, discard changes, invent results, or claim
+validation succeeded unless it actually ran and passed.
 
 For Android or Compose work, read the applicable Momens skill and use
 [Compose Guide](docs/compose/README.md) to select project-specific guidance.
