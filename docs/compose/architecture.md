@@ -16,10 +16,13 @@
 @HiltViewModel
 class SignalViewModel @Inject constructor(
     private val repository: SignalRepository,
-) : ViewModel()
+) : ViewModel() {
+    private val _uiState =
+        MutableStateFlow<UiState<SignalUiState>>(UiState.Loading)
+    val uiState: StateFlow<UiState<SignalUiState>> =
+        _uiState.asStateFlow()
+}
 
-private val _uiState = MutableStateFlow<UiState<SignalUiState>>(UiState.Loading)
-val uiState: StateFlow<UiState<SignalUiState>> = _uiState.asStateFlow()
 ```
 
 ## Route, Screen, Component

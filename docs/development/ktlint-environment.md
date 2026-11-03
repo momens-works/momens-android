@@ -16,9 +16,9 @@ ktlint와 항상 같지는 않습니다.
 
 ## 실행되지 않을 때
 
-처음 실행하는 환경에서는 Gradle Wrapper와 Java 21 toolchain을 내려받을 수 있으므로
-인터넷 연결이 필요합니다. 사내·학교 네트워크, 프록시 또는 오프라인 환경에서는 다운로드가
-실패해 ktlint 작업까지 도달하지 못할 수 있습니다.
+처음 실행하는 환경에서는 Gradle Wrapper, Gradle 데몬 JVM(Java 21), 프로젝트 컴파일
+toolchain(Java 17)을 내려받을 수 있으므로 인터넷 연결이 필요합니다. 사내·학교 네트워크,
+프록시 또는 오프라인 환경에서는 다운로드가 실패해 ktlint 작업까지 도달하지 못할 수 있습니다.
 
 다음 명령으로 stacktrace를 포함한 실패 로그를 수집합니다.
 
@@ -32,7 +32,8 @@ ktlint와 항상 같지는 않습니다.
 
 | 메시지 | 먼저 확인할 사항 |
 | --- | --- |
-| `JAVA_HOME`, `toolchain` | Java 21 탐색 또는 다운로드 실패 |
+| `JAVA_HOME`, Gradle 데몬 JVM | Java 21 탐색 또는 다운로드 실패 |
+| `toolchain` | Java 17 탐색 또는 다운로드 실패 |
 | `Could not resolve`, `SSL`, `proxy` | Gradle 또는 toolchain 다운로드 네트워크 문제 |
 | `Access denied` | Gradle 캐시 또는 프로젝트 파일 권한 문제 |
 

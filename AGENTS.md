@@ -71,8 +71,15 @@ stop and ask before changing code.
 - Run the smallest relevant test set when tests exist.
 - If no relevant automated test exists, state that and record the validation
   that did run in the PR.
-- Documentation-only changes: run `git diff --check`. When changing a link,
-  file path, or command, verify that its target exists or the command is valid.
+- Documentation-only changes:
+  1. While changes are unstaged, run `git diff --check`.
+  2. Before committing, stage only in-scope files and run
+     `git diff --cached --check`; this includes newly added files.
+  3. Before updating a PR, run `git diff --check origin/develop...HEAD`, or
+     replace `origin/develop` with the actual PR base, to check the committed
+     PR diff.
+  When changing a link, file path, or command, verify that its target exists
+  or the command is valid.
 - Use the platform-appropriate Gradle Wrapper command from
   `docs/development/ktlint-environment.md`; it contains the exact macOS, Linux, and
   Windows commands. Gradle `ktlintCheck` is the final formatting authority,
