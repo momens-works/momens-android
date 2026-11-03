@@ -12,10 +12,23 @@ Choose the smallest set of guides that matches the work.
 | Android, Kotlin, Compose, ViewModel, UI review | `.agents/.skills/momens-android/SKILL.md` |
 | Task, branch, commit, PR, or GitHub migration | `.agents/.skills/momens-workflow/SKILL.md` |
 | Compose implementation details | `.agents/.skills/momens-android/references/compose-basic-flow.md` and `.agents/.skills/momens-android/references/momens-project-flow.md` |
-| ktlint, formatting, or Windows/macOS environment issues | `docs/momens-compose-flow.md` |
+| Project-specific Compose workflow | `docs/compose/README.md` |
+| ktlint, formatting, or Windows/macOS environment issues | `docs/development/ktlint-environment.md` |
 
 Codex must use the applicable Momens skill. Other AI tools must read the same
 files directly.
+
+## Rule Precedence
+
+Apply instructions in this order:
+
+1. The user's current request
+2. This file's safety, scope, and validation rules
+3. The applicable Momens skill and its required references
+4. Existing code style in the relevant feature
+
+If two project instructions conflict and the order above does not resolve it,
+stop and ask before changing code.
 
 ## Before Editing
 
@@ -48,15 +61,18 @@ files directly.
 
 ## Validation
 
-- Kotlin or Compose changes: run `:app:ktlintCheck`.
+- Kotlin or Compose changes: run the platform-appropriate Gradle Wrapper
+  command for `:app:ktlintCheck`.
 - UI state, ViewModel, navigation, build, or other compile-sensitive changes:
-  also run `:app:compileDebugKotlin`.
+  also run the platform-appropriate Gradle Wrapper command for
+  `:app:compileDebugKotlin`.
 - Run the smallest relevant test set when tests exist.
 - If no relevant automated test exists, state that and record the validation
   that did run in the PR.
 - Use the platform-appropriate Gradle Wrapper command from
-  `docs/momens-compose-flow.md`. Gradle `ktlintCheck` is the final formatting
-  authority, not IDE reformatting.
+  `docs/development/ktlint-environment.md`; it contains the exact macOS, Linux, and
+  Windows commands. Gradle `ktlintCheck` is the final formatting authority,
+  not IDE reformatting.
 
 ## Momens and GitHub Workflow
 
@@ -80,6 +96,7 @@ app/src/main/java/com/momens/android/
 ├── data/          # remote, local, repository implementations
 └── presentation/  # Compose features, ViewModels, UI state
 
-.agents/.skills/  # Momens Android and workflow guides
-docs/              # team-facing implementation and environment guides
+.agents/.skills/      # Momens Android and workflow guides
+docs/compose/         # Compose architecture, UI, and feature workflows
+docs/development/     # development-environment troubleshooting guides
 ```
