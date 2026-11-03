@@ -6,10 +6,12 @@ enum class TaskPriorityModel {
     LOW,
     MEDIUM,
     HIGH,
+    URGENT,
 }
 
 fun TaskPriorityDto.toModel(): TaskPriorityModel = when (this) {
     TaskPriorityDto.LOW -> TaskPriorityModel.LOW
     TaskPriorityDto.MEDIUM -> TaskPriorityModel.MEDIUM
     TaskPriorityDto.HIGH -> TaskPriorityModel.HIGH
+    TaskPriorityDto.URGENT -> TaskPriorityModel.URGENT
 }
