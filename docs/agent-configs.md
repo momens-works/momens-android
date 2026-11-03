@@ -2,7 +2,7 @@
 
 Momens Android 프로젝트에서 사용하는 AI 에이전트 설정을 설명합니다.
 
-이 문서는 TOML 설정 파일을 직접 읽지 않아도, 어떤 에이전트를 언제 어떻게 사용하면 되는지 알 수 있도록 정리한 사용자용 가이드입니다.
+이 문서는 에이전트 설정 파일을 직접 읽지 않아도, 어떤 에이전트를 언제 어떻게 사용하면 되는지 알 수 있도록 정리한 사용자용 가이드입니다.
 
 ## 문서 구조
 
@@ -14,28 +14,37 @@ Momens Android 프로젝트에서 사용하는 AI 에이전트 설정을 설명�
 └── pr-writer.toml
 
 .claude/agents/
-├── momens-explorer.toml
-├── momens-reviewer.toml
-├── code-reviewer.toml
-└── pr-writer.toml
+├── momens-explorer.md
+├── momens-reviewer.md
+├── code-reviewer.md
+└── pr-writer.md
 ```
 
-Codex와 Claude 폴더에는 같은 이름의 에이전트 설정이 들어 있습니다.
+Codex와 Claude Code 폴더에는 같은 역할의 에이전트 설정이 들어 있습니다.
 
-현재 같은 이름의 파일은 내용도 동일합니다. 따라서 사용하는 도구에 맞는 폴더의 설정을 사용하면 됩니다.
+Codex는 TOML 설정을 사용하고, Claude Code는 YAML frontmatter가 있는 Markdown 설정을 사용합니다.
+
+Claude Code는 `.claude/agents/` 안의 Markdown 파일만 프로젝트 에이전트로 자동 등록합니다. 따라서 해당 폴더에서는 `.toml`이 아닌 `.md` 파일을 사용합니다.
 
 ## 에이전트 목록
 
-| 에이전트 | 파일 | 목적 |
-| --- | --- | --- |
-| `momens_explorer` | `momens-explorer.toml` | 구현 전에 관련 코드 구조와 흐름을 읽기 전용으로 탐색 |
-| `momens_reviewer` | `momens-reviewer.toml` | Momens Compose 규칙을 기준으로 화면 구현을 리뷰 |
-| `code_reviewer` | `code-reviewer.toml` | PR 리뷰처럼 correctness, architecture, test risk를 넓게 점검 |
-| `pr_writer` | `pr-writer.toml` | PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성 |
+| 에이전트 | Codex 파일 | Claude Code 파일 | 목적 |
+| --- | --- | --- | --- |
+| `momens_explorer` | `momens-explorer.toml` | `momens-explorer.md` | 구현 전에 관련 코드 구조와 흐름을 읽기 전용으로 탐색 |
+| `momens_reviewer` | `momens-reviewer.toml` | `momens-reviewer.md` | Momens Compose 규칙을 기준으로 화면 구현을 리뷰 |
+| `code_reviewer` | `code-reviewer.toml` | `code-reviewer.md` | PR 리뷰처럼 correctness, architecture, test risk를 넓게 점검 |
+| `pr_writer` | `pr-writer.toml` | `pr-writer.md` | PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성 |
 
-네 에이전트는 모두 읽기 전용입니다.
+네 에이전트는 모두 읽기 전용입니다. Claude Code 설정은 `Read`, `Glob`, `Grep`만
+허용하므로 `Write`, `Edit`, `Bash`, MCP 도구를 사용할 수 없습니다.
 
 파일을 직접 수정하지 않고, 코드 구조를 설명하거나 리뷰 의견을 제공합니다.
+
+Claude Code 에이전트는 Git shell에 접근하지 않습니다. PR 또는 아직 커밋하지 않은
+변경을 검토할 때 호출자는 필요한 정보를 프롬프트에 함께 전달합니다.
+
+- `momens_reviewer`, `code_reviewer`: 변경 파일 경로 또는 diff, 실행한 검증 결과
+- `pr_writer`: 브랜치명, diff, 검증 결과, 확인된 Momens 티켓·스크린샷 정보
 
 ## 선택 기준
 
@@ -117,7 +126,10 @@ Momens Compose 규칙을 어긴 부분만 중요도 순으로 알려줘.
 ### 최종 코드 리뷰
 
 ```text
-code_reviewer로 현재 git diff를 PR 리뷰처럼 봐줘.
+code_reviewer로 아래 diff를 PR 리뷰처럼 봐줘.
+
+<git diff 결과>
+
 Critical, Major, Minor 순서로 정리하고 missing tests도 알려줘.
 ```
 
@@ -129,8 +141,12 @@ code_reviewer로 project 패키지 변경사항을 리뷰해줘.
 ### PR 본문 작성
 
 ```text
-pr_writer로 현재 git diff를 기준으로 PR 본문 작성해줘.
-관련 Momens 티켓은 MOM-0752이고, 테스트는 아직 안 돌렸어.
+pr_writer로 아래 정보로 PR 본문을 작성해줘.
+
+브랜치: docs/MOM-0752-momens-task-workflow
+검증: 테스트 미실행
+diff:
+<git diff 결과>
 ```
 
 ```text
@@ -192,18 +208,23 @@ PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성합니다.
 주로 확인하는 것:
 
 - `.github/pull_request_template.md`
-- 현재 `git diff`
-- 현재 브랜치명에 포함된 Momens 티켓 번호
+- 호출자가 전달한 diff와 브랜치명
+- 호출자가 전달한 Momens 티켓 번호와 검증 결과
 - 변경된 파일과 패키지
 - 사용자에게 보이는 변경사항
 - 내부 구조 변경이나 문서 변경
 - 실제로 실행된 테스트 또는 확인되지 않은 검증 항목
 
-PR 본문을 작성할 때 관련 작업은 브랜치명의 `MOM-0000` 패턴을 우선 사용합니다.
+Claude Code의 `pr_writer`는 Git 명령을 실행하지 않습니다. 호출자는 PR 본문에 필요한
+브랜치명, diff, 검증 결과를 프롬프트에 제공해야 합니다.
+
+PR 본문을 작성할 때 관련 작업은 호출자가 전달한 브랜치명의 `MOM-0000` 패턴을 우선
+사용합니다.
 
 프롬프트에서 Momens 티켓 번호를 직접 알려준 경우에는 프롬프트 값을 우선합니다.
 
-브랜치명과 프롬프트 어디에도 Momens 티켓 번호가 없으면 임의로 만들지 않습니다.
+호출자가 전달한 브랜치명과 프롬프트 어디에도 Momens 티켓 번호가 없으면 임의로 만들지
+않습니다.
 
 테스트 결과와 스크린샷 여부도 임의로 만들지 않습니다.
 
@@ -212,5 +233,6 @@ PR 본문을 작성할 때 관련 작업은 브랜치명의 `MOM-0000` 패턴을
 - 이 에이전트들은 읽기 전용 탐색과 리뷰 목적입니다.
 - 파일 수정이 필요하면 구현 작업을 별도로 요청해야 합니다.
 - 리뷰 결과는 권장사항이므로, 실제 반영 여부는 변경 범위와 요구사항에 맞춰 판단합니다.
-- Android/Compose 작업의 최신 기준은 `AGENTS.md`와 `.agents/.skills/momens-android/`를 우선 확인합니다.
+- Android/Compose 작업의 최신 기준은 `AGENTS.md`, `.agents/.skills/momens-android/`,
+  `docs/compose/README.md`를 우선 확인합니다.
 - 작업 관리, 브랜치, 커밋, PR 흐름의 최신 기준은 `AGENTS.md`와 `.agents/.skills/momens-workflow/`를 우선 확인합니다.
