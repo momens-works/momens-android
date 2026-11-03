@@ -1,7 +1,7 @@
 ---
 name: momens_explorer
 description: Read-only explorer for mapping the Momens Android Compose codebase structure and relevant execution paths.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep
 permissionMode: plan
 effort: medium
 ---

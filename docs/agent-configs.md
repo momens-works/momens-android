@@ -35,9 +35,16 @@ Claude Code는 `.claude/agents/` 안의 Markdown 파일만 프로젝트 에이�
 | `code_reviewer` | `code-reviewer.toml` | `code-reviewer.md` | PR 리뷰처럼 correctness, architecture, test risk를 넓게 점검 |
 | `pr_writer` | `pr-writer.toml` | `pr-writer.md` | PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성 |
 
-네 에이전트는 모두 읽기 전용입니다. Claude Code 설정은 `Read`, `Glob`, `Grep`, `Bash`만 허용하고 `permissionMode: plan`을 사용하므로 파일을 수정하거나 쓰지 않습니다.
+네 에이전트는 모두 읽기 전용입니다. Claude Code 설정은 `Read`, `Glob`, `Grep`만
+허용하므로 `Write`, `Edit`, `Bash`, MCP 도구를 사용할 수 없습니다.
 
 파일을 직접 수정하지 않고, 코드 구조를 설명하거나 리뷰 의견을 제공합니다.
+
+Claude Code 에이전트는 Git shell에 접근하지 않습니다. PR 또는 아직 커밋하지 않은
+변경을 검토할 때 호출자는 필요한 정보를 프롬프트에 함께 전달합니다.
+
+- `momens_reviewer`, `code_reviewer`: 변경 파일 경로 또는 diff, 실행한 검증 결과
+- `pr_writer`: 브랜치명, diff, 검증 결과, 확인된 Momens 티켓·스크린샷 정보
 
 ## 선택 기준
 
@@ -119,7 +126,10 @@ Momens Compose 규칙을 어긴 부분만 중요도 순으로 알려줘.
 ### 최종 코드 리뷰
 
 ```text
-code_reviewer로 현재 git diff를 PR 리뷰처럼 봐줘.
+code_reviewer로 아래 diff를 PR 리뷰처럼 봐줘.
+
+<git diff 결과>
+
 Critical, Major, Minor 순서로 정리하고 missing tests도 알려줘.
 ```
 
@@ -131,8 +141,12 @@ code_reviewer로 project 패키지 변경사항을 리뷰해줘.
 ### PR 본문 작성
 
 ```text
-pr_writer로 현재 git diff를 기준으로 PR 본문 작성해줘.
-관련 Momens 티켓은 MOM-0752이고, 테스트는 아직 안 돌렸어.
+pr_writer로 아래 정보로 PR 본문을 작성해줘.
+
+브랜치: docs/MOM-0752-momens-task-workflow
+검증: 테스트 미실행
+diff:
+<git diff 결과>
 ```
 
 ```text
@@ -194,18 +208,23 @@ PR 템플릿에 맞춰 현재 변경사항의 PR 본문을 작성합니다.
 주로 확인하는 것:
 
 - `.github/pull_request_template.md`
-- 현재 `git diff`
-- 현재 브랜치명에 포함된 Momens 티켓 번호
+- 호출자가 전달한 diff와 브랜치명
+- 호출자가 전달한 Momens 티켓 번호와 검증 결과
 - 변경된 파일과 패키지
 - 사용자에게 보이는 변경사항
 - 내부 구조 변경이나 문서 변경
 - 실제로 실행된 테스트 또는 확인되지 않은 검증 항목
 
-PR 본문을 작성할 때 관련 작업은 브랜치명의 `MOM-0000` 패턴을 우선 사용합니다.
+Claude Code의 `pr_writer`는 Git 명령을 실행하지 않습니다. 호출자는 PR 본문에 필요한
+브랜치명, diff, 검증 결과를 프롬프트에 제공해야 합니다.
+
+PR 본문을 작성할 때 관련 작업은 호출자가 전달한 브랜치명의 `MOM-0000` 패턴을 우선
+사용합니다.
 
 프롬프트에서 Momens 티켓 번호를 직접 알려준 경우에는 프롬프트 값을 우선합니다.
 
-브랜치명과 프롬프트 어디에도 Momens 티켓 번호가 없으면 임의로 만들지 않습니다.
+호출자가 전달한 브랜치명과 프롬프트 어디에도 Momens 티켓 번호가 없으면 임의로 만들지
+않습니다.
 
 테스트 결과와 스크린샷 여부도 임의로 만들지 않습니다.
 
