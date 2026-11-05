@@ -84,7 +84,7 @@ fun TaskEditRoute(
         UiState.Failure -> LoadingScreen() // 다시 시도 화면 구현 후에 수정 예정
         is UiState.Success -> TaskEditScreen(
             paddingValues = paddingValues,
-            state = renderState,
+            state = renderState.data,
             onStatusChange = viewModel::changeStatus,
             onRoleSelect = viewModel::changeRole,
             onPriorityChange = viewModel::changePriority,
@@ -106,7 +106,7 @@ fun TaskEditRoute(
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun TaskEditScreen(
-    state: UiState<TaskEditState>,
+    state: TaskEditState,
     onStatusChange: (MomensStatusEditType) -> Unit,
     onRoleSelect: (TaskRole) -> Unit,
     onPriorityChange: (ImportantLevel) -> Unit,
@@ -123,8 +123,7 @@ private fun TaskEditScreen(
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
-    val taskEditState = state.successData!!
-    val task = taskEditState.task
+    val task = state.task
 
     val titleState = remember { TextFieldState(task.titleState) }
     val purposeState = remember { TextFieldState(task.purposeState) }
@@ -165,7 +164,7 @@ private fun TaskEditScreen(
             .advancedImePadding(),
     ) {
         MomensHeader(
-            text = taskEditState.pageTitle,
+            text = state.pageTitle,
             isSaveVisible = true,
             onSaveClick = { onSaveClick(titleState.text.toString(), purposeState.text.toString()) },
             onBackClick = onBackClick,
@@ -264,7 +263,7 @@ private fun TaskEditScreen(
         TaskEditAssigneeBottomSheet(
             state = searchState,
             selectedAssignee = task.assignee,
-            assignees = taskEditState.assignees,
+            assignees = state.assignees,
             onDismiss = { isAssigneeOpen = false },
             onAssigneeChange = onAssigneeChange,
             onDeleteClick = onAssigneeDeleteClick,
@@ -277,7 +276,7 @@ private fun TaskEditScreen(
 @Composable
 private fun TaskEditScreenPreview() {
     MomensTheme {
-        var state by remember { mutableStateOf<UiState<TaskEditState>>(UiState.Success(TaskEditState.Fake)) }
+        var state by remember { mutableStateOf(TaskEditState.Fake) }
 
         TaskEditScreen(
             paddingValues = PaddingValues(0.dp),
