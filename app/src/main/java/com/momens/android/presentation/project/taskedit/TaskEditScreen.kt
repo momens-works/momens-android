@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.momens.android.core.common.extension.addFocusCleaner
 import com.momens.android.presentation.project.taskedit.component.rememberDragDropState
 import com.momens.android.core.common.extension.advancedImePadding
+import com.momens.android.core.common.state.UiState
 import com.momens.android.core.designsystem.component.header.MomensHeader
 import com.momens.android.core.designsystem.component.snackbar.model.MomensSnackbarModel
 import com.momens.android.core.designsystem.component.type.ImportantLevel
@@ -36,6 +37,8 @@ import com.momens.android.core.designsystem.component.type.MomensStatusEditType
 import com.momens.android.core.designsystem.theme.MomensTheme
 import com.momens.android.core.designsystem.trigger.LocalGlobalUiEventTrigger
 import com.momens.android.core.designsystem.trigger.SnackbarState
+import com.momens.android.core.util.successData
+import com.momens.android.presentation.loading.LoadingScreen
 import com.momens.android.presentation.project.model.Assignee
 import com.momens.android.presentation.project.model.TaskRole
 import com.momens.android.presentation.project.taskedit.component.TaskEditCompleteSectionHeader
@@ -76,23 +79,28 @@ fun TaskEditRoute(
         }
     }
 
-    TaskEditScreen(
-        paddingValues = paddingValues,
-        state = state,
-        onStatusChange = viewModel::changeStatus,
-        onRoleSelect = viewModel::changeRole,
-        onPriorityChange = viewModel::changePriority,
-        onAssigneeChange = viewModel::updateAssignee,
-        onAssigneeSearchClick = viewModel::getAssignees,
-        onChecklistTitleChange = viewModel::updateChecklistTitle,
-        onChecklistAddClick = viewModel::addChecklistItem,
-        onCheckedChange = viewModel::changeCheck,
-        onChecklistClearClick = viewModel::clearChecklistItem,
-        onChecklistReorder = viewModel::reorderChecklist,
-        onSaveClick = viewModel::saveTask,
-        onBackClick = viewModel::navigateUp,
-        onAssigneeDeleteClick = viewModel::removeAssignee,
-    )
+    when (val renderState = state) {
+        UiState.Loading -> LoadingScreen()
+        UiState.Failure -> LoadingScreen() // 다시 시도 화면 구현 후에 수정 예정
+        is UiState.Success -> TaskEditScreen(
+            paddingValues = paddingValues,
+            state = renderState.data,
+            onStatusChange = viewModel::changeStatus,
+            onRoleSelect = viewModel::changeRole,
+            onPriorityChange = viewModel::changePriority,
+            onAssigneeChange = viewModel::updateAssignee,
+            onAssigneeSearchClick = viewModel::getAssignees,
+            onChecklistTitleChange = viewModel::updateChecklistTitle,
+            onChecklistAddClick = viewModel::addChecklistItem,
+            onCheckedChange = viewModel::changeCheck,
+            onChecklistClearClick = viewModel::clearChecklistItem,
+            onChecklistReorder = viewModel::reorderChecklist,
+            onSaveClick = viewModel::saveTask,
+            onBackClick = viewModel::navigateUp,
+            onAssigneeDeleteClick = viewModel::removeAssignee,
+        )
+        UiState.Empty -> Unit
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
