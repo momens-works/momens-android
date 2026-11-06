@@ -31,6 +31,7 @@ fun MomensCheckBox(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isToggleEnabled: Boolean = true,
 ) {
     val iconRes = if (isChecked) R.drawable.ic_checkbox_fill else R.drawable.ic_checkbox_empty
     val iconTint = if (isChecked && enabled) MomensTheme.colors.primary50 else MomensTheme.colors.gray300
@@ -42,7 +43,7 @@ fun MomensCheckBox(
             .noRippleToggleable(
                 value = isChecked,
                 onValueChange = onCheckedChange,
-                enabled = enabled,
+                enabled = enabled && isToggleEnabled,
                 role = Role.Checkbox,
             ),
         verticalAlignment = Alignment.CenterVertically,

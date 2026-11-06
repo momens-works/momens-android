@@ -75,7 +75,7 @@ fun TaskDetailCompletionSection(
                         MomensCheckBox(
                             isChecked = item.completed,
                             label = item.title,
-                            enabled = item.id !in mutatingItemIds,
+                            isToggleEnabled = item.id !in mutatingItemIds,
                             onCheckedChange = { checked -> onCheckedChange(item.id, checked) },
                             modifier = Modifier.fillMaxWidth(),
                         )
