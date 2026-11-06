@@ -22,7 +22,9 @@ import com.momens.android.core.designsystem.component.sectiontitle.MomensSection
 import com.momens.android.core.designsystem.theme.MomensTheme
 import com.momens.android.presentation.project.model.ChecklistItem
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentList
 
 @Composable
@@ -30,6 +32,7 @@ fun TaskDetailCompletionSection(
     completedCount: Int,
     totalCount: Int,
     items: ImmutableList<ChecklistItem>,
+    mutatingItemIds: ImmutableSet<String>,
     onCheckedChange: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -72,6 +75,7 @@ fun TaskDetailCompletionSection(
                         MomensCheckBox(
                             isChecked = item.completed,
                             label = item.title,
+                            enabled = item.id !in mutatingItemIds,
                             onCheckedChange = { checked -> onCheckedChange(item.id, checked) },
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -118,6 +122,7 @@ private fun TaskDetailCompletionSectionPreview() {
             completedCount = items.count { it.completed },
             totalCount = items.size,
             items = items,
+            mutatingItemIds = persistentSetOf(),
             onCheckedChange = { id, checked ->
                 items = items
                     .map { if (it.id == id) it.copy(completed = checked) else it }
@@ -136,6 +141,7 @@ private fun TaskDetailCompletionSectionEmptyPreview() {
             completedCount = 0,
             totalCount = 0,
             items = persistentListOf(),
+            mutatingItemIds = persistentSetOf(),
             onCheckedChange = { _, _ -> },
         )
     }
