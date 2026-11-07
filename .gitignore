@@ -7,6 +7,9 @@ local.properties
 *.keystore
 *.jks
 
+# Firebase
+app/google-services.json
+
 # Android Studio / IntelliJ
 *.iml
 *.ipr
