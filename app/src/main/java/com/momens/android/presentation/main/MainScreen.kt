@@ -60,7 +60,6 @@ fun MainScreen(
         GlobalUiEventHolder(showSnackbar = snackbarController::show)
     }
 
-    // 스플래시/로그인/온보딩에서는 currentTab이 null이므로, 로그인 후 메인 탭 화면에 진입했을 때 요청한다.
     RequestNotificationPermissionEffect(enabled = currentTab != null)
 
     LaunchedEffect(pendingPushData, currentTab) {

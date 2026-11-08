@@ -13,12 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import timber.log.Timber
 
-/**
- * 알림 권한을 요청합니다.
- *
- * [enabled]가 true가 되는 시점(예: 로그인 후 메인 탭 화면 진입)에 한 번만 요청합니다.
- * 탭 화면과 상세 화면을 오가며 [enabled]가 바뀌어도 이미 요청했다면 다시 요청하지 않습니다.
- */
 @Composable
 fun RequestNotificationPermissionEffect(
     enabled: Boolean,
