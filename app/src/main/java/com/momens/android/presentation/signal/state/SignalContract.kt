@@ -7,8 +7,10 @@ import com.momens.android.presentation.signal.model.SignalCardUiModel
 import com.momens.android.presentation.signal.model.SignalEvidenceUiModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 
 @Immutable
 data class SignalState(
@@ -16,6 +18,7 @@ data class SignalState(
     val pageDescription: String = "프로젝트의 의사결정에 영향을 줄 수 있는 변화입니다.",
     val signals: ImmutableList<SignalCardUiModel> = persistentListOf(),
     val evidencesBySignalId: ImmutableMap<String, ImmutableList<SignalEvidenceUiModel>> = persistentMapOf(),
+    val mutatingSignalIds: ImmutableSet<String> = persistentSetOf()
 ) {
     companion object {
         val Fake = SignalState(
