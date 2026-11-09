@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.momens.android.R
-import com.momens.android.core.network.google.rememberGoogleSignInLauncher
 import com.momens.android.core.common.extension.collectSideEffect
 import com.momens.android.core.common.state.UiState
 import com.momens.android.core.designsystem.component.button.MomensCtaButton
 import com.momens.android.core.designsystem.component.logo.MomensLogo
 import com.momens.android.core.designsystem.component.type.MomensCtaType
 import com.momens.android.core.designsystem.theme.MomensTheme
+import com.momens.android.core.sdk.google.rememberGoogleSignInLauncher
 
 @Composable
 fun SignInRoute(
