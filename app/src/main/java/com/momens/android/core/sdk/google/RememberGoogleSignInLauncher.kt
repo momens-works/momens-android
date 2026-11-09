@@ -1,4 +1,4 @@
-package com.momens.android.core.network.google
+package com.momens.android.core.sdk.google
 
 import android.app.Activity
 import android.content.Context
@@ -6,7 +6,7 @@ import android.content.ContextWrapper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.momens.android.core.network.google.di.GoogleSignInEntryPoint
+import com.momens.android.core.sdk.google.di.GoogleSignInEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
