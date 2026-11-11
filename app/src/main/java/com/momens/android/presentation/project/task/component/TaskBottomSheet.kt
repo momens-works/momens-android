@@ -41,6 +41,7 @@ fun TaskBottomSheet(
     titleState: TextFieldState,
     selectedRole: MomensTaskButtonType?,
     selectedPriority: ImportantLevel?,
+    isCreatingTask: Boolean,
     onRoleSelect: (MomensTaskButtonType) -> Unit,
     onPrioritySelect: (ImportantLevel) -> Unit,
     onDismiss: () -> Unit,
@@ -50,7 +51,8 @@ fun TaskBottomSheet(
     val roles = MomensTaskButtonType.entries
     val priorities = ImportantLevel.entries
 
-    val isButtonEnabled = titleState.text.isNotBlank() && selectedRole != null && selectedPriority != null
+    val isButtonEnabled = titleState.text.isNotBlank() &&
+        selectedRole != null && selectedPriority != null && !isCreatingTask
 
     MomensBottomSheet(
         onDismiss = onDismiss,
@@ -172,7 +174,7 @@ fun TaskBottomSheet(
                     enabled = isButtonEnabled,
                 ) {
                     Text(
-                        text = "태스크 등록",
+                        text = if (isCreatingTask) "등록 중..." else "태스크 등록",
                         color = MomensTheme.colors.white,
                         style = MomensTheme.typography.bodyB16,
                     )
@@ -202,6 +204,7 @@ private fun TaskBottomSheetPreview() {
                 selectedRole = previewSelectedRole,
                 onRoleSelect = { previewSelectedRole = it },
                 selectedPriority = previewSelectedPriority,
+                isCreatingTask = false,
                 onPrioritySelect = { previewSelectedPriority = it },
                 onDismiss = {},
                 onRegisterClick = {},

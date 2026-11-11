@@ -47,19 +47,22 @@ fun TaskRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val projectContext by viewModel.projectContext.collectAsStateWithLifecycle()
+    val isCreatingTask by viewModel.isCreatingTask.collectAsStateWithLifecycle()
     val globalUiEvent = LocalGlobalUiEventTrigger.current
 
     val renderState = rememberMinDurationUiState(uiState)
     var pendingActionSnackbar by remember { mutableStateOf<SnackbarState?>(null) }
+    var createdTaskCount by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadTaskBoard()
+    LaunchedEffect(projectContext.projectId) {
+        viewModel.loadTaskBoard(projectContext.projectId)
     }
 
     LaunchedEffect(viewModel) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
                 is TaskSideEffect.ShowActionSnackbar -> {
+                    createdTaskCount++
                     pendingActionSnackbar = SnackbarState(
                         content = MomensSnackbarModel(
                             title = effect.message,
@@ -100,6 +103,8 @@ fun TaskRoute(
                 onTaskClick = navigateToTaskDetail,
                 uiState = renderState.data,
                 avatarUrl = projectContext.avatarUrl,
+                isCreatingTask = isCreatingTask,
+                createdTaskCount = createdTaskCount,
                 onRegisterClick = viewModel::addTask,
             )
 
@@ -112,6 +117,8 @@ private fun TaskScreen(
     paddingValues: PaddingValues,
     uiState: TaskUiState,
     avatarUrl: String?,
+    isCreatingTask: Boolean,
+    createdTaskCount: Int,
     onTaskClick: (String) -> Unit,
     onRegisterClick: (title: String, role: MomensTaskButtonType, priority: ImportantLevel) -> Unit,
     modifier: Modifier = Modifier,
@@ -125,6 +132,13 @@ private fun TaskScreen(
         titleState.clearText()
         selectedRole = null
         selectedPriority = null
+    }
+
+    LaunchedEffect(createdTaskCount) {
+        if (createdTaskCount > 0) {
+            resetTaskInput()
+            showTaskBottomSheet = false
+        }
     }
 
     Box(
@@ -181,11 +195,14 @@ private fun TaskScreen(
             titleState = titleState,
             selectedRole = selectedRole,
             selectedPriority = selectedPriority,
+            isCreatingTask = isCreatingTask,
             onRoleSelect = { selectedRole = it },
             onPrioritySelect = { selectedPriority = it },
             onDismiss = {
-                resetTaskInput()
-                showTaskBottomSheet = false
+                if (!isCreatingTask) {
+                    resetTaskInput()
+                    showTaskBottomSheet = false
+                }
             },
             onRegisterClick = {
                 onRegisterClick(
@@ -193,8 +210,6 @@ private fun TaskScreen(
                     requireNotNull(selectedRole),
                     requireNotNull(selectedPriority),
                 )
-                resetTaskInput()
-                showTaskBottomSheet = false
             },
         )
     }
@@ -209,6 +224,8 @@ private fun TaskScreenPreview() {
                 paddingValues = innerPadding,
                 uiState = TaskUiState.Fake,
                 avatarUrl = null,
+                isCreatingTask = false,
+                createdTaskCount = 0,
                 onTaskClick = {},
                 onRegisterClick = { _, _, _ -> },
             )
@@ -225,6 +242,8 @@ private fun TaskScreenEmptyPreview() {
                 paddingValues = innerPadding,
                 uiState = TaskUiState.FakeEmpty,
                 avatarUrl = null,
+                isCreatingTask = false,
+                createdTaskCount = 0,
                 onTaskClick = {},
                 onRegisterClick = { _, _, _ -> },
             )
