@@ -1,5 +1,6 @@
 package com.momens.android.data.signin.remote.datasourceimpl
 
+import com.momens.android.core.util.withTokenTimeout
 import com.momens.android.data.signin.remote.datasource.SignInRemoteDataSource
 import com.momens.android.data.signin.remote.dto.request.SignInTokenRequest
 import com.momens.android.data.signin.remote.dto.request.TokenRefreshRequest
@@ -15,13 +16,13 @@ class SignInRemoteDataSourceImpl @Inject constructor(
     override suspend fun postGoogleToken(
         request: SignInTokenRequest,
     ): TokenResponse {
-        return signInService.postGoogleToken(request)
+        return withTokenTimeout { signInService.postGoogleToken(request) }
     }
 
     override suspend fun refreshToken(
         request: TokenRefreshRequest,
     ): TokenResponse {
-        return signInService.getNewAccessToken(request)
+        return withTokenTimeout { signInService.getNewAccessToken(request) }
     }
 
     override suspend fun getMobileBootstrap(): MobileBootstrapResponse {

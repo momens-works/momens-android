@@ -8,6 +8,8 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.momens.android.core.util.suspendRunCatching
+import com.momens.android.core.util.withTokenTimeout
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -19,7 +21,7 @@ class CredentialManagerGoogleSignInLauncher @Inject constructor(
     private val googleWebClientId: String,
 ) : GoogleSignInLauncher {
 
-    override suspend fun launch(): Result<String> = runCatching {
+    override suspend fun launch(): Result<String> = suspendRunCatching {
         require(googleWebClientId.isNotBlank()) {
             "google_server_client_id is blank."
         }
@@ -32,10 +34,12 @@ class CredentialManagerGoogleSignInLauncher @Inject constructor(
             .addCredentialOption(googleIdOption)
             .build()
 
-        val credential = credentialManager.getCredential(
-            context = activityContext,
-            request = request,
-        ).credential
+        val credential = withTokenTimeout(timeoutMillis = 120_000L) {
+            credentialManager.getCredential(
+                context = activityContext,
+                request = request,
+            ).credential
+        }
 
         if (
             credential !is CustomCredential ||
