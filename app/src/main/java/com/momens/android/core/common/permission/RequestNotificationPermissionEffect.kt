@@ -20,7 +20,7 @@ fun RequestNotificationPermissionEffect(
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
 
     val context = LocalContext.current
-    var hasRequested by rememberSaveable { mutableStateOf(false) }
+    var hasCheckedPermission by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
@@ -28,9 +28,9 @@ fun RequestNotificationPermissionEffect(
     }
 
     LaunchedEffect(enabled) {
-        if (!enabled || hasRequested) return@LaunchedEffect
+        if (!enabled || hasCheckedPermission) return@LaunchedEffect
 
-        hasRequested = true
+        hasCheckedPermission = true
         if (!context.hasNotificationPermission()) {
             launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
