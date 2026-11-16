@@ -61,11 +61,14 @@ fun MomensCtaButton(
 
 }
 
-@Preview(widthDp = 320)
+@Preview(widthDp = 336)
 @Composable
 private fun MomensCtaButtonPreview() {
     MomensTheme {
         Column(
+            modifier = Modifier
+                .background(MomensTheme.colors.gray100)
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -115,11 +118,33 @@ private fun MomensCtaButtonPreview() {
                         tint = Color.Unspecified,
                     )
                     Text(
-                        text = "text",
+                        text = "Continue with Google",
                         color = MomensTheme.colors.gray700,
                         style = MomensTheme.typography.bodyB16,
                     )
                 }
+            }
+
+            MomensCtaButton(
+                onClick = {},
+                type = MomensCtaType.RESET,
+            ) {
+                Text(
+                    text = "필터 초기화",
+                    color = MomensTheme.colors.gray700,
+                    style = MomensTheme.typography.bodyB16,
+                )
+            }
+
+            MomensCtaButton(
+                onClick = {},
+                type = MomensCtaType.DELETE,
+            ) {
+                Text(
+                    text = "태스크 삭제",
+                    color = MomensTheme.colors.gray400,
+                    style = MomensTheme.typography.bodyB16,
+                )
             }
         }
     }
