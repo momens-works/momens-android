@@ -36,8 +36,9 @@ fun MomensCtaButton(
     } else {
         when (type) {
             MomensCtaType.DEFAULT -> MomensTheme.colors.primary100
-            MomensCtaType.LOGIN -> MomensTheme.colors.white
+            MomensCtaType.LOGIN, MomensCtaType.RESET -> MomensTheme.colors.white
             MomensCtaType.CANCEL -> MomensTheme.colors.gray300
+            MomensCtaType.DELETE -> MomensTheme.colors.white
         }
     }
 
