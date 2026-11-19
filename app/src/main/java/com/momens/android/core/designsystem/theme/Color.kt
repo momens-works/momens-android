@@ -16,6 +16,7 @@ private val PointMint = Color(0xFF70D4CC)
 
 // Black & White
 private val White = Color(0xFFFFFFFF)
+// TODO: Add a separate #000000 token for Figma calendar text and icons (Black is #191919).
 private val Black = Color(0xFF191919)
 
 // Grayscale
