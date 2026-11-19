@@ -113,7 +113,6 @@ private fun CalendarMonthHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         MonthArrow(
-            contentDescription = "이전 달",
             isPrevious = true,
             onClick = { onMonthChange(yearMonth.minusMonths(1)) },
         )
@@ -125,7 +124,6 @@ private fun CalendarMonthHeader(
             textAlign = TextAlign.Center,
         )
         MonthArrow(
-            contentDescription = "다음 달",
             isPrevious = false,
             onClick = { onMonthChange(yearMonth.plusMonths(1)) },
         )
@@ -134,7 +132,6 @@ private fun CalendarMonthHeader(
 
 @Composable
 private fun MonthArrow(
-    contentDescription: String,
     isPrevious: Boolean,
     onClick: () -> Unit,
 ) {
