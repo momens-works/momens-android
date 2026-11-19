@@ -38,23 +38,28 @@ import java.time.YearMonth
 @Composable
 fun TaskCalendar(
     today: LocalDate = LocalDate.now(),
-    yearMonth: YearMonth = YearMonth.from(today),
+    yearMonth: YearMonth? = null,
     selection: CalendarSelection? = null,
     onDateClick: (LocalDate) -> Unit,
     onMonthChange: (YearMonth) -> Unit,
     modifier: Modifier = Modifier,
     disabledDates: Set<LocalDate> = emptySet(),
 ) {
-    val weeks = remember(yearMonth) { calendarWeeks(yearMonth) }
+    var defaultYearMonth by remember(today) { mutableStateOf(YearMonth.from(today)) }
     var defaultSelection by remember(today) {
         mutableStateOf<CalendarSelection>(CalendarSelection.Single(today))
     }
+    val displayedYearMonth = yearMonth ?: defaultYearMonth
     val displayedSelection = selection ?: defaultSelection
+    val weeks = remember(displayedYearMonth) { calendarWeeks(displayedYearMonth) }
 
     Column(modifier = modifier.background(MomensTheme.colors.white)) {
         CalendarMonthHeader(
-            yearMonth = yearMonth,
-            onMonthChange = onMonthChange,
+            yearMonth = displayedYearMonth,
+            onMonthChange = { month ->
+                if (yearMonth == null) defaultYearMonth = month
+                onMonthChange(month)
+            },
         )
 
         Spacer(modifier = Modifier.height(4.dp))
