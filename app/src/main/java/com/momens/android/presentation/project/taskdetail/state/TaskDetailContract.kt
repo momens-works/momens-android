@@ -11,11 +11,14 @@ import com.momens.android.presentation.project.taskdetail.model.TaskDetailFileMo
 import com.momens.android.presentation.project.taskdetail.model.TaskDetailModel
 import com.momens.android.presentation.project.taskdetail.model.TaskDetailQuestionModel
 import com.momens.android.presentation.signal.model.SignalAccordionType
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 
 @Immutable
 data class TaskDetailState(
     val taskDetail: TaskDetailModel? = null,
+    val mutatingChecklistItemIds: ImmutableSet<String> = persistentSetOf()
 ) {
     companion object {
         val Fake = TaskDetailState(

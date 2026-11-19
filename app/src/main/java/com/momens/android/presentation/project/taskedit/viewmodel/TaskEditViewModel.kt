@@ -194,8 +194,13 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun saveTask(title: String, purpose: String) {
+        if (_state.value.isSaving) return
+
         _state.update {
-            it.copy(task = it.task.copy(titleState = title.ifBlank { "새 태스크" }, purposeState = purpose))
+            it.copy(
+                task = it.task.copy(titleState = title.ifBlank { "새 태스크" }, purposeState = purpose),
+                isSaving = true
+            )
         }
 
         viewModelScope.launch {
@@ -216,6 +221,7 @@ class TaskEditViewModel @Inject constructor(
                     ),
                 )
             }
+            _state.update { it.copy(isSaving = false) }
         }
     }
 }

@@ -11,8 +11,9 @@ import com.momens.android.presentation.signal.model.toUiModels
 import com.momens.android.presentation.signal.state.SignalSideEffect
 import com.momens.android.presentation.signal.state.SignalState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class SignalViewModel @Inject constructor(
@@ -47,22 +49,22 @@ class SignalViewModel @Inject constructor(
 
         viewModelScope.launch {
             signalRepository.getSignals(projectId = projectId).onSuccess { signalList ->
-                    _state.update { currentState ->
-                        val currentData = currentState.successData ?: SignalState()
-                        UiState.Success(
-                            currentData.copy(
-                                pageTitle = signalList.title,
-                                pageDescription = signalList.description,
-                                signals = signalList.signals.toUiModels(),
-                            ),
-                        )
-                    }
-                }.onFailure {
-                    if (_state.value !is UiState.Success) {
-                        _state.value = UiState.Failure
-                    }
-                    _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "시그널을 불러오지 못했습니다."))
+                _state.update { currentState ->
+                    val currentData = currentState.successData ?: SignalState()
+                    UiState.Success(
+                        currentData.copy(
+                            pageTitle = signalList.title,
+                            pageDescription = signalList.description,
+                            signals = signalList.signals.toUiModels(),
+                        ),
+                    )
                 }
+            }.onFailure {
+                if (_state.value !is UiState.Success) {
+                    _state.value = UiState.Failure
+                }
+                _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "시그널을 불러오지 못했습니다."))
+            }
         }
     }
 
@@ -72,33 +74,72 @@ class SignalViewModel @Inject constructor(
 
         viewModelScope.launch {
             signalRepository.getSignalDetail(signalId = signalId).onSuccess { detail ->
-                    _state.updateSuccess { state ->
-                        state.copy(
-                            evidencesBySignalId = state.evidencesBySignalId.toPersistentMap()
-                                .put(signalId, detail.evidence.toUiModels()),
-                        )
-                    }
-                }.onFailure {
-                    _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "시그널 상세를 불러오지 못했습니다."))
+                _state.updateSuccess { state ->
+                    state.copy(
+                        evidencesBySignalId = state.evidencesBySignalId.toPersistentMap()
+                            .put(signalId, detail.evidence.toUiModels()),
+                    )
                 }
+            }.onFailure {
+                _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "시그널 상세를 불러오지 못했습니다."))
+            }
         }
     }
 
     fun deleteSignal(signalId: String) {
+        val state = _state.value.successData ?: return
+        if (signalId in state.mutatingSignalIds) {
+            viewModelScope.launch {
+                _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "삭제가 진행 중입니다. 잠시만 기다려주세요."))
+            }
+            return
+        }
+
+        _state.updateSuccess {
+            it.copy(mutatingSignalIds = (it.mutatingSignalIds + signalId).toPersistentSet())
+        }
+
         viewModelScope.launch {
-            signalRepository.dismissSignal(signalId = signalId).onSuccess {
-                    loadSignals()
+            signalRepository.dismissSignal(signalId = signalId)
+                .onSuccess {
+                    _state.updateSuccess { current ->
+                        current.copy(
+                            signals = current.signals.filterNot {
+                                it.id == signalId
+                            }.toPersistentList(),
+                        )
+                    }
+
                     _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "시그널이 삭제되었습니다."))
                 }.onFailure {
                     _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "시그널 삭제에 실패했습니다."))
                 }
+            _state.updateSuccess {
+                it.copy(mutatingSignalIds = (it.mutatingSignalIds - signalId).toPersistentSet())
+            }
         }
     }
 
     fun registerTask(signalId: String) {
+        val state = _state.value.successData ?: return
+        if (signalId in state.mutatingSignalIds) {
+            viewModelScope.launch {
+                _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "등록 중입니다. 잠시만 기다려주세요."))
+            }
+            return
+        }
+
+        _state.updateSuccess {
+            it.copy(mutatingSignalIds = (it.mutatingSignalIds + signalId).toPersistentSet())
+        }
+
         viewModelScope.launch {
-            signalRepository.convertToTask(signalId = signalId).onSuccess { result ->
-                    loadSignals()
+            signalRepository.convertToTask(signalId = signalId)
+                .onSuccess { result ->
+                    _state.updateSuccess { current ->
+                        current.copy(signals = current.signals.filterNot { it.id == signalId }.toPersistentList())
+                    }
+
                     _sideEffect.emit(
                         SignalSideEffect.ShowActionSnackbar(
                             message = "태스크가 등록되었습니다",
@@ -109,6 +150,9 @@ class SignalViewModel @Inject constructor(
                 }.onFailure {
                     _sideEffect.emit(SignalSideEffect.ShowSnackbar(message = "태스크 등록에 실패했습니다."))
                 }
+            _state.updateSuccess {
+                it.copy(mutatingSignalIds = (it.mutatingSignalIds - signalId).toPersistentSet())
+            }
         }
     }
 }
