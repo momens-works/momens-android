@@ -17,18 +17,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.momens.android.R
-import com.momens.android.core.network.google.rememberGoogleSignInLauncher
 import com.momens.android.core.common.extension.collectSideEffect
-import com.momens.android.core.common.state.UiState
 import com.momens.android.core.designsystem.component.button.MomensCtaButton
 import com.momens.android.core.designsystem.component.logo.MomensLogo
 import com.momens.android.core.designsystem.component.type.MomensCtaType
 import com.momens.android.core.designsystem.theme.MomensTheme
+import com.momens.android.core.sdk.google.rememberGoogleSignInLauncher
+import com.momens.android.presentation.signin.viewmodel.SignInViewModel
+import kotlinx.coroutines.CancellationException
 
 @Composable
 fun SignInRoute(
@@ -43,9 +50,12 @@ fun SignInRoute(
     viewModel.sideEffect.collectSideEffect { sideEffect ->
         when (sideEffect) {
             SignInSideEffect.LaunchGoogleSignIn -> {
-                viewModel.onGoogleSignInResult(
-                    googleSignInLauncher.launch(),
-                )
+                try {
+                    viewModel.onGoogleSignInResult(googleSignInLauncher.launch())
+                } catch (exception: CancellationException) {
+                    viewModel.onGoogleSignInInterrupted()
+                    throw exception
+                }
             }
 
             SignInSideEffect.NavigateToOnboarding -> navigateToOnboarding()
@@ -56,7 +66,7 @@ fun SignInRoute(
 
     SignInScreen(
         paddingValues = paddingValues,
-        isGoogleLoginEnabled = signInState !is UiState.Loading,
+        uiState = signInState,
         onGoogleLoginClick = viewModel::onGoogleSignInClick,
     )
 }
@@ -64,7 +74,7 @@ fun SignInRoute(
 @Composable
 private fun SignInScreen(
     paddingValues: PaddingValues,
-    isGoogleLoginEnabled: Boolean,
+    uiState: SignInUiState,
     onGoogleLoginClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,11 +97,30 @@ private fun SignInScreen(
         ) {
             Spacer(modifier = Modifier.weight(273f))
 
+            uiState.feedback?.let { feedback ->
+                Text(
+                    text = when (feedback) {
+                        SignInFeedback.CANCELLED -> "로그인을 취소했어요. 계속하려면 Google 로그인 버튼을 눌러주세요."
+                        SignInFeedback.AUTHENTICATION_FAILED -> "Google 인증에 실패했어요. 계정을 확인하고 다시 시도해 주세요."
+                        SignInFeedback.NETWORK_FAILED -> "연결에 실패했어요. 네트워크 상태를 확인하고 다시 시도해 주세요."
+                        SignInFeedback.SERVICE_FAILED -> "로그인을 완료하지 못했어요. 잠시 후 다시 시도해 주세요."
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
+                    color = MomensTheme.colors.white,
+                    style = MomensTheme.typography.bodyB16,
+                    textAlign = TextAlign.Center,
+                )
+            }
+
             MomensCtaButton(
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .semantics { role = Role.Button },
                 onClick = onGoogleLoginClick,
                 type = MomensCtaType.LOGIN,
-                enabled = isGoogleLoginEnabled,
+                enabled = !uiState.isLoading,
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -131,7 +160,43 @@ private fun SignInScreenPreview() {
     MomensTheme {
         SignInScreen(
             paddingValues = PaddingValues(),
-            isGoogleLoginEnabled = true,
+            uiState = SignInUiState(),
+            onGoogleLoginClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignInScreenFailurePreview() {
+    MomensTheme {
+        SignInScreen(
+            paddingValues = PaddingValues(),
+            uiState = SignInUiState(feedback = SignInFeedback.NETWORK_FAILED),
+            onGoogleLoginClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignInScreenCancelledPreview() {
+    MomensTheme {
+        SignInScreen(
+            paddingValues = PaddingValues(),
+            uiState = SignInUiState(feedback = SignInFeedback.CANCELLED),
+            onGoogleLoginClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignInScreenLoadingPreview() {
+    MomensTheme {
+        SignInScreen(
+            paddingValues = PaddingValues(),
+            uiState = SignInUiState(isLoading = true),
             onGoogleLoginClick = {},
         )
     }

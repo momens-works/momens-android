@@ -1,7 +1,7 @@
-package com.momens.android.core.network.google.di
+package com.momens.android.core.sdk.google.di
 
-import com.momens.android.core.network.google.CredentialManagerGoogleSignInLauncher
-import com.momens.android.core.network.google.GoogleSignInLauncher
+import com.momens.android.core.sdk.google.CredentialManagerGoogleSignInLauncher
+import com.momens.android.core.sdk.google.GoogleSignInLauncher
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
