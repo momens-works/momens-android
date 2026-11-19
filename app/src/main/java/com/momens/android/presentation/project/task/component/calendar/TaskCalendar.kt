@@ -27,6 +27,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -97,9 +101,10 @@ fun TaskCalendar(
 private fun CalendarMonthHeader(
     yearMonth: YearMonth,
     onMonthChange: (YearMonth) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
             .padding(horizontal = 10.dp),
@@ -127,11 +132,12 @@ private fun CalendarMonthHeader(
 private fun MonthArrow(
     isPrevious: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Icon(
         painter = painterResource(R.drawable.ic_next),
         contentDescription = null,
-        modifier = Modifier
+        modifier = modifier
             .size(24.dp)
             .then(if (isPrevious) Modifier.graphicsLayer(scaleX = -1f) else Modifier)
             .clickable(onClick = onClick),
@@ -140,10 +146,10 @@ private fun MonthArrow(
 }
 
 @Composable
-private fun CalendarWeekdayHeader() {
+private fun CalendarWeekdayHeader(modifier: Modifier = Modifier) {
     val weekdays = listOf("일", "월", "화", "수", "목", "금", "토")
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(30.dp)
             .padding(horizontal = 13.dp, vertical = 8.dp),
@@ -173,6 +179,7 @@ private fun CalendarDateCell(
     date: LocalDate,
     state: CalendarDateState,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val shape = when (state) {
         CalendarDateState.TODAY,
@@ -208,13 +215,30 @@ private fun CalendarDateCell(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .clip(shape)
             .background(background)
             .then(
                 if (state == CalendarDateState.DISABLED) Modifier else Modifier.clickable(onClick = onClick),
-            ),
+            )
+            .semantics {
+                selected = state == CalendarDateState.SELECTED ||
+                    state == CalendarDateState.RANGE_START ||
+                    state == CalendarDateState.RANGE_MIDDLE ||
+                    state == CalendarDateState.RANGE_END
+                when (state) {
+                    CalendarDateState.RANGE_START -> stateDescription = "범위 시작"
+                    CalendarDateState.RANGE_MIDDLE -> stateDescription = "범위 중간"
+                    CalendarDateState.RANGE_END -> stateDescription = "범위 끝"
+                    CalendarDateState.DISABLED -> {
+                        disabled()
+                        stateDescription = "선택할 수 없음"
+                    }
+
+                    else -> Unit
+                }
+            },
         contentAlignment = Alignment.Center,
     ) {
         Text(
