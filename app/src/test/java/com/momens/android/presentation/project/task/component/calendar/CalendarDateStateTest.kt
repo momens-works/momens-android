@@ -4,7 +4,6 @@ import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** 기간 선택, 오늘, 비활성 상태가 겹칠 때의 우선순위를 확인한다. */
 class CalendarDateStateTest {
     private val today = LocalDate.of(2026, 10, 1)
     private val range = CalendarSelection.Range(

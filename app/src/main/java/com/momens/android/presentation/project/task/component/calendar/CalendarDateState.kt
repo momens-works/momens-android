@@ -12,7 +12,6 @@ enum class CalendarDateState {
     RANGE_END,
 }
 
-/** 비활성 날짜를 먼저 처리한 뒤 선택 범위, 오늘, 기본 상태 순서로 셀 모양을 결정한다. */
 fun dateState(
     date: LocalDate,
     selection: CalendarSelection,

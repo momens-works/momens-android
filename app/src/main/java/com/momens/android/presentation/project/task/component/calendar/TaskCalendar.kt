@@ -35,10 +35,6 @@ import com.momens.android.core.designsystem.theme.MomensTheme
 import java.time.LocalDate
 import java.time.YearMonth
 
-/**
- * 태스크 생성 화면용 월간 캘린더. 기본값은 사용자 기기의 오늘 날짜를 선택한다.
- * 선택 상태를 전달하지 않으면 날짜 클릭을 내부에서 반영하고, 전달하면 상위 상태를 따른다.
- */
 @Composable
 fun TaskCalendar(
     today: LocalDate = LocalDate.now(),
@@ -49,7 +45,6 @@ fun TaskCalendar(
     modifier: Modifier = Modifier,
     disabledDates: Set<LocalDate> = emptySet(),
 ) {
-    // 월이 바뀔 때만 날짜 칸을 다시 계산한다. 빈 칸은 화면에 그리지 않는다.
     val weeks = remember(yearMonth) { calendarWeeks(yearMonth) }
     var defaultSelection by remember(today) {
         mutableStateOf<CalendarSelection>(CalendarSelection.Single(today))
@@ -189,7 +184,6 @@ private fun CalendarDateCell(
     state: CalendarDateState,
     onClick: () -> Unit,
 ) {
-    // Figma의 단일 선택과 범위 양 끝은 진한 배경, 범위 중간은 연한 배경이다.
     val shape = when (state) {
         CalendarDateState.TODAY,
         CalendarDateState.SELECTED,

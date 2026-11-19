@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** 월 시작 요일과 4·5·6주 달의 빈 칸 배치를 확인한다. */
 class CalendarMonthTest {
     @Test
     fun `month starts on correct weekday and ends with empty cells`() {
