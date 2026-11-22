@@ -1,4 +1,4 @@
-package com.momens.android.presentation.signin
+package com.momens.android.presentation.signin.sdk
 
 import android.app.Activity
 import android.content.Context
@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.momens.android.core.sdk.google.GoogleSignInLauncher
-import com.momens.android.core.sdk.google.di.GoogleSignInEntryPoint
+import com.momens.android.presentation.signin.sdk.di.GoogleSignInEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
