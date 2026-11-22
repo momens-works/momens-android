@@ -69,27 +69,23 @@ class TaskEditViewModel @Inject constructor(
     val sideEffect = _sideEffect.asSharedFlow()
 
     init {
-        loadTask()
+        if (cachedTask == null) loadTask()
     }
 
     private fun loadTask() {
         viewModelScope.launch {
             taskDetailRepository.getTaskDetail(taskId = taskId)
                 .onSuccess { detail ->
-                    _state.update { current ->
-                        val currentData = current.successData
-                            ?: TaskEditState(
-                                task = detail.toUiModel().toEditTask(),
-                                assignees = persistentListOf(),
-                            )
-                        UiState.Success(currentData.copy(task = detail.toUiModel().toEditTask()))
-                    }
+                    _state.value = UiState.Success(
+                        TaskEditState(
+                            task = detail.toUiModel().toEditTask(),
+                            assignees = persistentListOf(),
+                        ),
+                    )
                 }
                 .onFailure {
-                    if (_state.value !is UiState.Success) {
-                        _state.value = UiState.Failure
-                    }
-                    _sideEffect.emit(TaskEditSideEffect.ShowSnackBar(message = "태스크 정보를 불러오지 못했습니다."))
+                    _state.value = UiState.Failure
+                    _sideEffect.emit(TaskEditSideEffect.ShowSnackBar(message = "태스크 정보를 불러보지 못했습니다."))
                 }
         }
     }
