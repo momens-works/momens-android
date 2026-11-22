@@ -28,7 +28,6 @@ import com.momens.android.core.designsystem.component.button.MomensCtaButton
 import com.momens.android.core.designsystem.component.logo.MomensLogo
 import com.momens.android.core.designsystem.component.type.MomensCtaType
 import com.momens.android.core.designsystem.theme.MomensTheme
-import com.momens.android.core.sdk.google.rememberGoogleSignInLauncher
 
 @Composable
 fun SignInRoute(
