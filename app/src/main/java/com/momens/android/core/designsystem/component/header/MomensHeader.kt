@@ -34,7 +34,7 @@ fun MomensHeader(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(horizontal = 19.dp, vertical = 12.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_next),
