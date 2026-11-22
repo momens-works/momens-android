@@ -1,4 +1,4 @@
-package com.momens.android.presentation.signin
+package com.momens.android.presentation.signin.state
 
 enum class SignInFeedback {
     CANCELLED,
