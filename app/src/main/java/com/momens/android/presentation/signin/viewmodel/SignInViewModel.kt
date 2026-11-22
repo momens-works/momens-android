@@ -6,9 +6,9 @@ import com.momens.android.core.local.onboarding.OnboardingManager
 import com.momens.android.core.sdk.google.GoogleSignInCancelledException
 import com.momens.android.core.util.suspendRunCatching
 import com.momens.android.data.signin.repository.SignInRepository
-import com.momens.android.presentation.signin.SignInFeedback
-import com.momens.android.presentation.signin.SignInSideEffect
-import com.momens.android.presentation.signin.SignInUiState
+import com.momens.android.presentation.signin.state.SignInFeedback
+import com.momens.android.presentation.signin.state.SignInSideEffect
+import com.momens.android.presentation.signin.state.SignInUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -79,9 +79,14 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             suspendRunCatching {
                 signInRepository.signInWithGoogle(idToken).getOrThrow()
-                onboardingManager.getHasSeenOnboarding()
             }
-                .onSuccess { hasSeenOnboarding ->
+                .onSuccess {
+                    val hasSeenOnboarding = suspendRunCatching {
+                        onboardingManager.getHasSeenOnboarding()
+                    }.getOrElse { throwable ->
+                        Timber.e(throwable, "온보딩 확인 여부 조회 실패")
+                        false
+                    }
                     val sideEffect = if (hasSeenOnboarding) {
                         SignInSideEffect.NavigateToSignal
                     } else {
