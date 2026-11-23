@@ -27,9 +27,9 @@ fun MomensHeader(
     backgroundColor: Color = MomensTheme.colors.white,
     isSaveVisible: Boolean = false,
     isWriteVisible: Boolean = false,
+    isSaveEnabled: Boolean = true,
     onWriteClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
-    isSaveEnabled: Boolean = true
 ) {
     Box(
         modifier = modifier
