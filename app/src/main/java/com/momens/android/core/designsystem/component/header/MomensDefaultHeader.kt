@@ -3,11 +3,9 @@ package com.momens.android.core.designsystem.component.header
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -42,8 +40,7 @@ fun MomensDefaultHeader(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .width(100.dp)
-                .aspectRatio(90f / 20f),
+                .size(width = 100.dp, height = 22.dp),
             tint = Color.Unspecified,
         )
 
