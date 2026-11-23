@@ -44,7 +44,7 @@ fun MomensModal(
             painter = painterResource(id = R.drawable.ic_warning),
             contentDescription = null,
             tint = MomensTheme.colors.gray300,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(48.dp),
         )
 
         Spacer(modifier = Modifier.height(height = 8.dp))
