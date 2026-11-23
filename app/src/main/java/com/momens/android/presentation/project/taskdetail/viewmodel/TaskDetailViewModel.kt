@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import coil3.util.CoilUtils.result
 import com.momens.android.core.common.extension.updateSuccess
 import com.momens.android.core.common.state.UiState
 import com.momens.android.core.common.util.successData
@@ -108,7 +109,19 @@ class TaskDetailViewModel @Inject constructor(
                 }
                 .onFailure {
                     _state.updateSuccess { current ->
-                        current.copy(taskDetail = current.taskDetail?.copy(checklist = previousChecklist))
+                        val currentChecklist = current.taskDetail?.checklist ?: return@updateSuccess current
+                        val rollBackItems = currentChecklist.items
+                            .map { if (it.id == itemId) it.copy(completed = !completed) else it }
+                            .toPersistentList()
+
+                        current.copy(
+                            taskDetail = current.taskDetail?.copy(
+                                checklist = currentChecklist.copy(
+                                    completedCount = rollBackItems.count { it.completed },
+                                    items = rollBackItems
+                                ),
+                            ),
+                        )
                     }
                     _sideEffect.emit(TaskDetailSideEffect.ShowSnackbar(message = "완료 상태 변경에 실패했습니다."))
                 }
