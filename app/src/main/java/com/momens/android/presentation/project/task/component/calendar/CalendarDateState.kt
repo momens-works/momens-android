@@ -23,6 +23,7 @@ fun dateState(
     when (selection) {
         CalendarSelection.None -> Unit
         is CalendarSelection.Single -> if (date == selection.date) return CalendarDateState.SELECTED
+        is CalendarSelection.Multiple -> if (date in selection.dates) return CalendarDateState.SELECTED
         is CalendarSelection.Range -> {
             if (selection.start == selection.end && date == selection.start) return CalendarDateState.SELECTED
             if (date == selection.start) return CalendarDateState.RANGE_START
