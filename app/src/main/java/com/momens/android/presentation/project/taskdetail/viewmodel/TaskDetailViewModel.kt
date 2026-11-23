@@ -89,11 +89,14 @@ class TaskDetailViewModel @Inject constructor(
                 .onSuccess { result ->
                     _state.updateSuccess { current ->
                         val currentChecklist = current.taskDetail?.checklist ?: return@updateSuccess current
+                        val newItems = currentChecklist.items
+                            .map { if (it.id == result.item.id) result.item.toUiModel() else it }
+                            .toPersistentList()
 
                         current.copy(
                             taskDetail = current.taskDetail?.copy(
                                 checklist = currentChecklist.copy(
-                                    completedCount = result.completedCount,
+                                    completedCount = newItems.count {it.completed},
                                     totalCount = result.totalCount,
                                     items = currentChecklist.items
                                         .map { if (it.id == result.item.id) result.item.toUiModel() else it }
