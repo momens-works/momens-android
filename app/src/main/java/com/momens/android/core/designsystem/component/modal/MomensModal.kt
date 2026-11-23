@@ -60,7 +60,7 @@ fun MomensModal(
         Text(
             text = description,
             color = MomensTheme.colors.gray500,
-            style = MomensTheme.typography.bodyB14,
+            style = MomensTheme.typography.bodyM14,
         )
 
         Spacer(modifier = Modifier.height(height = 18.dp))
