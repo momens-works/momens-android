@@ -42,13 +42,18 @@ import java.time.YearMonth
 @Composable
 fun TaskCalendar(
     yearMonth: YearMonth,
+    selectionMode: CalendarSelectionMode,
     selection: CalendarSelection,
-    onDateClick: (LocalDate) -> Unit,
+    onSelectionChange: (CalendarSelection) -> Unit,
     onMonthChange: (YearMonth) -> Unit,
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     disabledDates: Set<LocalDate> = emptySet(),
 ) {
+    require(
+        selectionMode != CalendarSelectionMode.SINGLE ||
+            selection == CalendarSelection.None || selection is CalendarSelection.Single,
+    ) { "Single selection mode requires no selection or one selected date" }
     val weeks = remember(yearMonth) { calendarWeeks(yearMonth) }
 
     Column(modifier = modifier.background(MomensTheme.colors.white)) {
@@ -86,7 +91,7 @@ fun TaskCalendar(
                                 CalendarDateCell(
                                     date = date,
                                     state = dateState(date, selection, disabledDates, today),
-                                    onClick = { onDateClick(date) },
+                                    onClick = { onSelectionChange(selection.selectDate(date, selectionMode)) },
                                 )
                             }
                         }
@@ -257,9 +262,10 @@ private fun TaskCalendarDefaultPreview() {
     MomensTheme {
         TaskCalendar(
             yearMonth = YearMonth.from(today),
+            selectionMode = CalendarSelectionMode.SINGLE,
             selection = CalendarSelection.Single(today),
             today = today,
-            onDateClick = {},
+            onSelectionChange = {},
             onMonthChange = {},
             modifier = Modifier.width(320.dp),
         )
@@ -272,8 +278,9 @@ private fun TaskCalendarSelectedPreview() {
     MomensTheme {
         TaskCalendar(
             yearMonth = YearMonth.of(2026, 10),
+            selectionMode = CalendarSelectionMode.SINGLE,
             selection = CalendarSelection.Single(LocalDate.of(2026, 10, 9)),
-            onDateClick = {},
+            onSelectionChange = {},
             onMonthChange = {},
             modifier = Modifier.width(320.dp),
             today = LocalDate.of(2026, 10, 1),
@@ -287,11 +294,12 @@ private fun TaskCalendarRangePreview() {
     MomensTheme {
         TaskCalendar(
             yearMonth = YearMonth.of(2026, 10),
+            selectionMode = CalendarSelectionMode.MULTIPLE,
             selection = CalendarSelection.Range(
                 start = LocalDate.of(2026, 10, 9),
                 end = LocalDate.of(2026, 10, 13),
             ),
-            onDateClick = {},
+            onSelectionChange = {},
             onMonthChange = {},
             modifier = Modifier.width(320.dp),
             today = LocalDate.of(2026, 10, 1),
@@ -304,35 +312,14 @@ private fun TaskCalendarRangePreview() {
 private fun TaskCalendarAllStatesPreview() {
     val today = remember { LocalDate.now() }
     var yearMonth by remember { mutableStateOf(YearMonth.from(today)) }
-    var selection by remember { mutableStateOf<CalendarSelection>(CalendarSelection.Single(today)) }
-    var hasUserSelectedDate by remember { mutableStateOf(false) }
+    var selection by remember { mutableStateOf<CalendarSelection>(CalendarSelection.Multiple(setOf(today))) }
 
     MomensTheme {
         TaskCalendar(
             yearMonth = yearMonth,
+            selectionMode = CalendarSelectionMode.MULTIPLE,
             selection = selection,
-            onDateClick = { date ->
-                selection = if (!hasUserSelectedDate) {
-                    CalendarSelection.Single(date)
-                } else {
-                    when (val current = selection) {
-                        CalendarSelection.None -> CalendarSelection.Single(date)
-                        is CalendarSelection.Single -> {
-                            if (current.date == date) {
-                                CalendarSelection.None
-                            } else {
-                                CalendarSelection.Range(
-                                    start = minOf(current.date, date),
-                                    end = maxOf(current.date, date),
-                                )
-                            }
-                        }
-
-                        is CalendarSelection.Range -> CalendarSelection.Single(date)
-                    }
-                }
-                hasUserSelectedDate = true
-            },
+            onSelectionChange = { selection = it },
             onMonthChange = { yearMonth = it },
             modifier = Modifier.width(320.dp),
             today = today,
