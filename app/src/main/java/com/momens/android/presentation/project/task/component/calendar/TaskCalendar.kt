@@ -115,10 +115,12 @@ private fun CalendarMonthHeader(
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+
         MonthArrow(
             isPrevious = true,
             onClick = { onMonthChange(yearMonth.minusMonths(1)) },
         )
+
         Text(
             text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
             modifier = Modifier.weight(1f),
@@ -126,6 +128,7 @@ private fun CalendarMonthHeader(
             style = MomensTheme.typography.bodyB14,
             textAlign = TextAlign.Center,
         )
+
         MonthArrow(
             isPrevious = false,
             onClick = { onMonthChange(yearMonth.plusMonths(1)) },
