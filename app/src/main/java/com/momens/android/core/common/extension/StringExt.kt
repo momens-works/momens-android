@@ -36,3 +36,9 @@ fun String?.toKstDateTimeText(): String {
  * 공백을 포함한 글자 수 기준으로 [maxLength]를 초과하지 않도록 자릅니다.
  */
 fun String.limitLength(maxLength: Int): String = if (length > maxLength) take(maxLength) else this
+
+/**
+ * 공백을 포함한 글자 수가 [maxLength]를 넘으면 앞 `maxLength - 1`자 뒤에 `…`를 붙여 총 [maxLength]자로 줄입니다.
+ */
+fun String.ellipsize(maxLength: Int): String =
+    if (length > maxLength) take(maxLength - 1) + "…" else this
