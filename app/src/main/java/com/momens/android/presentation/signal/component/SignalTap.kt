@@ -1,9 +1,6 @@
 package com.momens.android.presentation.signal.component
 
-import android.R.attr.onClick
-import android.R.attr.type
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -23,7 +20,7 @@ fun SignalTap(
     count: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    type: SignalTapType = SignalTapType.DEFAULT
+    type: SignalTapType = SignalTapType.DEFAULT,
 ) {
     val lineColor = type.lineColor()
 
@@ -40,18 +37,18 @@ fun SignalTap(
                 )
             }
             .padding(horizontal = type.horizontalPadding, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = type.title,
             color = type.contentColor(),
-            style = type.textStyle()
+            style = type.textStyle(),
         )
 
         Text(
             text = count.toString(),
             color = type.contentColor(),
-            style = type.textStyle()
+            style = type.textStyle(),
         )
     }
 }
@@ -67,12 +64,12 @@ private fun SignalTapPreview() {
             SignalTap(
                 count = 12,
                 onClick = {},
-                type = SignalTapType.ACTIVE
+                type = SignalTapType.ACTIVE,
             )
             SignalTap(
                 count = 1,
                 onClick = {},
-                type = SignalTapType.DEFAULT
+                type = SignalTapType.DEFAULT,
             )
         }
     }
