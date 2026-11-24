@@ -50,10 +50,6 @@ fun TaskCalendar(
     today: LocalDate = LocalDate.now(),
     disabledDates: Set<LocalDate> = emptySet(),
 ) {
-    require(
-        selectionMode != CalendarSelectionMode.SINGLE ||
-            selection == CalendarSelection.None || selection is CalendarSelection.Single,
-    ) { "Single selection mode requires no selection or one selected date" }
     val weeks = remember(yearMonth) { calendarWeeks(yearMonth) }
 
     Column(modifier = modifier.background(MomensTheme.colors.white)) {
