@@ -25,6 +25,7 @@ import com.momens.android.core.designsystem.theme.MomensTheme
 @Composable
 fun MomensSwitch(
     isToggle: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dotOffset by animateDpAsState(
@@ -34,6 +35,7 @@ fun MomensSwitch(
 
     Row(
         modifier = modifier
+            .noRippleClickable(onClick = onClick)
             .width(36.dp)
             .background(
                 color = MomensTheme.colors.primary50,
@@ -63,15 +65,15 @@ private fun MomensSwitchPreview() {
             MomensSwitch(
                 isToggle = isToggle,
                 modifier = Modifier
-                    .padding(16.dp)
-                    .noRippleClickable { isToggle = !isToggle },
+                    .padding(16.dp),
+                onClick = { isToggle = !isToggle }
             )
 
             MomensSwitch(
                 isToggle = !isToggle,
                 modifier = Modifier
-                    .padding(16.dp)
-                    .noRippleClickable { isToggle = !isToggle },
+                    .padding(16.dp),
+                onClick = { isToggle = !isToggle }
             )
         }
     }
