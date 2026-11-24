@@ -104,6 +104,16 @@ private fun MomensChipButtonPreview() {
                 type = MomensChipButtonType.MINT,
                 onClick = {},
             )
+            MomensChipButton(
+                label = "All",
+                type = MomensChipButtonType.CLICK,
+                onClick = {},
+            )
+            MomensChipButton(
+                label = "All",
+                type = MomensChipButtonType.DEFAULT,
+                onClick = {},
+            )
         }
     }
 }
