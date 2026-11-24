@@ -19,9 +19,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.momens.android.R
+import com.momens.android.core.common.extension.ellipsize
 import com.momens.android.core.common.extension.noRippleClickable
 import com.momens.android.core.designsystem.component.dot.MomensDot
 import com.momens.android.core.designsystem.theme.MomensTheme
+
+private const val CATEGORY_MAX_LENGTH = 30
 
 @Composable
 fun MomensFileListItem(
@@ -121,7 +124,7 @@ private fun FileTextContent(
             )
 
             Text(
-                text = category,
+                text = category.ellipsize(CATEGORY_MAX_LENGTH),
                 color = MomensTheme.colors.gray400,
                 style = MomensTheme.typography.captionM11,
             )
@@ -139,5 +142,28 @@ private fun MomensFileListItemPreview() {
             category = "copy policy",
             onClick = {},
         )
+    }
+}
+
+@Preview
+@Composable
+private fun MomensFileListItemCategoryBoundaryPreview() {
+    MomensTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // 30자: 그대로 표시
+            MomensFileListItem(
+                title = "회원가입 에러 메시지 정책 초안",
+                role = "PM",
+                category = "a".repeat(30),
+                onClick = {},
+            )
+            // 31자: 앞 29자 + …
+            MomensFileListItem(
+                title = "회원가입 에러 메시지 정책 초안",
+                role = "PM",
+                category = "a".repeat(31),
+                onClick = {},
+            )
+        }
     }
 }
