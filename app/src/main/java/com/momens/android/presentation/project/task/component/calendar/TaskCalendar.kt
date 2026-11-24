@@ -1,7 +1,6 @@
 package com.momens.android.presentation.project.task.component.calendar
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.momens.android.R
+import com.momens.android.core.common.extension.noRippleClickable
 import com.momens.android.core.designsystem.theme.MomensTheme
 import java.time.LocalDate
 import java.time.YearMonth
@@ -144,7 +144,7 @@ private fun MonthArrow(
         modifier = modifier
             .size(24.dp)
             .then(if (isPrevious) Modifier.graphicsLayer(scaleX = -1f) else Modifier)
-            .clickable(onClick = onClick),
+            .noRippleClickable(onClick = onClick),
         tint = MomensTheme.colors.black,
     )
 }
@@ -224,7 +224,7 @@ private fun CalendarDateCell(
             .clip(shape)
             .background(background)
             .then(
-                if (state == CalendarDateState.DISABLED) Modifier else Modifier.clickable(onClick = onClick),
+                if (state == CalendarDateState.DISABLED) Modifier else Modifier.noRippleClickable(onClick = onClick),
             )
             .semantics {
                 selected = state == CalendarDateState.SELECTED ||
