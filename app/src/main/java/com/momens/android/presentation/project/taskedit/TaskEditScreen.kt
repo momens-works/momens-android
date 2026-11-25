@@ -166,6 +166,7 @@ private fun TaskEditScreen(
         MomensHeader(
             text = state.pageTitle,
             isSaveVisible = true,
+            isSaveEnabled = !state.isSaving,
             onSaveClick = { onSaveClick(titleState.text.toString(), purposeState.text.toString()) },
             onBackClick = onBackClick,
         )

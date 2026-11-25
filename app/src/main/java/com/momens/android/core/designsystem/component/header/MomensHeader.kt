@@ -27,6 +27,7 @@ fun MomensHeader(
     backgroundColor: Color = MomensTheme.colors.white,
     isSaveVisible: Boolean = false,
     isWriteVisible: Boolean = false,
+    isSaveEnabled: Boolean = true,
     onWriteClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
 ) {
@@ -71,7 +72,10 @@ fun MomensHeader(
                 color = MomensTheme.colors.gray900,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .noRippleClickable(onClick = onSaveClick)
+                    .noRippleClickable(
+                        enabled = isSaveEnabled,
+                        onClick = onSaveClick
+                    )
             )
         }
     }

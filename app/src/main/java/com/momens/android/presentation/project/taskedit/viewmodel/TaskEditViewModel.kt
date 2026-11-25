@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -227,8 +226,13 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun saveTask(title: String, purpose: String) {
+        if (_state.value.successData?.isSaving == true) return
+
         _state.updateSuccess {
-            it.copy(task = it.task.copy(titleState = title.ifBlank { "새 태스크" }, purposeState = purpose))
+            it.copy(
+                task = it.task.copy(titleState = title.ifBlank { "새 태스크" }, purposeState = purpose),
+                isSaving = true,
+            )
         }
 
         val task = _state.value.successData?.task ?: return
@@ -251,6 +255,7 @@ class TaskEditViewModel @Inject constructor(
                     ),
                 )
             }
+            _state.updateSuccess { it.copy(isSaving = false) }
         }
     }
 }
