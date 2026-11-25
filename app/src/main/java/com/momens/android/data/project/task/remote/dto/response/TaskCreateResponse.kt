@@ -13,7 +13,7 @@ data class CreatedTaskResponse(
     @SerialName("id") val id: String,
     @SerialName("project_id") val projectId: String,
     @SerialName("title") val title: String,
-    @SerialName("role") val role: String,
+    @SerialName("role") val role: String?,
     @SerialName("priority") val priority: String,
     @SerialName("status") val status: String,
 )

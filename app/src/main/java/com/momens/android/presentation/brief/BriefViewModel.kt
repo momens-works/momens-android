@@ -12,7 +12,9 @@ import com.momens.android.presentation.brief.model.toUiModel
 import com.momens.android.presentation.brief.state.BriefUiState
 import com.momens.android.presentation.brief.state.toUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +30,7 @@ class BriefViewModel @Inject constructor(
     private val briefRepository: BriefRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<BriefUiState>>(UiState.Loading)
+    private var signalFilterJob: Job? = null
     private var isLoadingMoreSignalSummary = false
 
     val uiState: StateFlow<UiState<BriefUiState>> = _uiState.asStateFlow()
@@ -62,19 +65,39 @@ class BriefViewModel @Inject constructor(
     fun selectSignalFilter(filterType: BriefSignalSummaryFilterType) {
         val currentState = (_uiState.value as? UiState.Success)?.data ?: return
         val filter = filterType.toApiFilter()
+        val requestedProjectId = currentState.project.id
 
-        viewModelScope.launch {
+        signalFilterJob?.cancel()
+        _uiState.updateSuccess { state ->
+            state.copy(
+                signalSummary = state.signalSummary.copy(
+                    selectedFilterType = filterType,
+                    items = persistentListOf(),
+                    nextCursor = null,
+                    isExpanded = false,
+                ),
+            )
+        }
+
+        signalFilterJob = viewModelScope.launch {
             briefRepository.getSignalSummary(
-                projectId = currentState.project.id,
+                projectId = requestedProjectId,
                 filter = filter,
                 cursor = null,
                 limit = null,
             ).onSuccess { response ->
                 Timber.tag(BRIEF_LOG_TAG).i(
-                    "getSignalSummary 응답 수신: projectId=${currentState.project.id}, " +
+                    "getSignalSummary 응답 수신: projectId=$requestedProjectId, " +
                         "filter=$filter, cursor=null, response=$response",
                 )
                 _uiState.updateSuccess { state ->
+                    if (
+                        state.project.id != requestedProjectId ||
+                        state.signalSummary.selectedFilterType != filterType
+                    ) {
+                        return@updateSuccess state
+                    }
+
                     state.copy(
                         signalSummary = state.signalSummary.copy(
                             selectedFilterType = filterType,
@@ -87,7 +110,7 @@ class BriefViewModel @Inject constructor(
             }.onFailure { throwable ->
                 Timber.tag(BRIEF_LOG_TAG).e(
                     throwable,
-                    "getSignalSummary 요청 실패: projectId=${currentState.project.id}, " +
+                    "getSignalSummary 요청 실패: projectId=$requestedProjectId, " +
                         "filter=$filter, cursor=null",
                 )
             }
@@ -108,29 +131,40 @@ class BriefViewModel @Inject constructor(
         if (nextCursor == null || isLoadingMoreSignalSummary) return
 
         val filter = signalSummary.selectedFilterType.toApiFilter()
+        val requestedProjectId = currentState.project.id
 
         Timber.tag(BRIEF_LOG_TAG).i(
-            "getSignalSummary 더보기 요청 시작: projectId=${currentState.project.id}, " +
+            "getSignalSummary 더보기 요청 시작: projectId=$requestedProjectId, " +
                 "filter=$filter, cursor=$nextCursor",
         )
 
+        isLoadingMoreSignalSummary = true
+
         viewModelScope.launch {
-            isLoadingMoreSignalSummary = true
             briefRepository.getSignalSummary(
-                projectId = currentState.project.id,
+                projectId = requestedProjectId,
                 filter = filter,
                 cursor = nextCursor,
                 limit = null,
             ).onSuccess { response ->
                 Timber.tag(BRIEF_LOG_TAG).i(
-                    "getSignalSummary 더보기 응답 수신: projectId=${currentState.project.id}, " +
+                    "getSignalSummary 더보기 응답 수신: projectId=$requestedProjectId, " +
                         "filter=$filter, cursor=$nextCursor, response=$response",
                 )
                 _uiState.updateSuccess { state ->
+                    val currentSummary = state.signalSummary
+                    if (
+                        state.project.id != requestedProjectId ||
+                        currentSummary.selectedFilterType != signalSummary.selectedFilterType ||
+                        currentSummary.nextCursor != nextCursor
+                    ) {
+                        return@updateSuccess state
+                    }
+
                     state.copy(
-                        signalSummary = state.signalSummary.copy(
+                        signalSummary = currentSummary.copy(
                             items = (
-                                state.signalSummary.items +
+                                currentSummary.items +
                                     response.items.map { item -> item.toUiModel() }
                                 ).toImmutableList(),
                             nextCursor = response.nextCursor,
@@ -141,7 +175,7 @@ class BriefViewModel @Inject constructor(
             }.onFailure { throwable ->
                 Timber.tag(BRIEF_LOG_TAG).e(
                     throwable,
-                    "getSignalSummary 더보기 요청 실패: projectId=${currentState.project.id}, " +
+                    "getSignalSummary 더보기 요청 실패: projectId=$requestedProjectId, " +
                         "filter=$filter, cursor=$nextCursor",
                 )
             }.also {

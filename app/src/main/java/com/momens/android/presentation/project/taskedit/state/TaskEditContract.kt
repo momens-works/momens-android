@@ -13,7 +13,6 @@ data class TaskEditState(
     val assignees: ImmutableList<Assignee>,
     val isAssigneeSheetVisible: Boolean = false,
     val isStatusSheetVisible: Boolean = false,
-    val isLoading: Boolean = false,
     val isSaving: Boolean = false,
 ) {
     companion object {

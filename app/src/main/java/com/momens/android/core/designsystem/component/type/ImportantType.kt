@@ -33,6 +33,12 @@ enum class ImportantLevel(
         grayIcon = R.drawable.ic_importance_high_gray,
         blueIcon = R.drawable.ic_importance_high_blue,
     ),
+    URGENT(
+        label = "urgent",
+        text = "긴급",
+        grayIcon = R.drawable.ic_importance_high_gray,
+        blueIcon = R.drawable.ic_importance_high_blue,
+    ),
 }
 
 enum class ImportantTone(

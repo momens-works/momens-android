@@ -43,7 +43,7 @@ fun TaskStatusBox(
             tasks.forEach { task ->
                 TaskListItem(
                     text = task.title,
-                    label = task.role.text,
+                    label = task.role?.text,
                     level = task.priority,
                     tone = task.tone,
                     count = task.materialCount.toString(),

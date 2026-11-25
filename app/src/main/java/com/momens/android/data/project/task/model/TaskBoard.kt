@@ -22,7 +22,7 @@ data class TaskGroup(
 data class TaskItem(
     val id: String,
     val title: String,
-    val role: String,
+    val role: String?,
     val priority: String,
     val materialCount: Int,
 )

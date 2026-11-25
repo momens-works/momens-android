@@ -60,7 +60,7 @@ fun MainScreen(
         GlobalUiEventHolder(showSnackbar = snackbarController::show)
     }
 
-    RequestNotificationPermissionEffect()
+    RequestNotificationPermissionEffect(enabled = currentTab != null)
 
     LaunchedEffect(pendingPushData, currentTab) {
         val pushData = pendingPushData ?: return@LaunchedEffect

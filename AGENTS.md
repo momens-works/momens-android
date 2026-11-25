@@ -1,121 +1,113 @@
 # Momens AI Agent Guide
 
-This project is an Android application built with Jetpack Compose.
+Momens is an Android app built with Kotlin, Jetpack Compose, MVVM, StateFlow,
+and Hilt. Code style is enforced with ktlint and `.editorconfig`.
 
-When an AI agent writes or modifies Android or Compose-related code, it must follow the Momens conventions documented in this repository.
+## Read First
 
-Codex should use the `momens-android` skill for Android/Compose work and the
-`momens-workflow` skill for task, branch, commit, and PR workflow. Other agents,
-including Claude, should read the same skill and reference files directly.
+Choose the smallest set of guides that matches the work.
 
-## Project Context
+| Work | Required guide |
+| --- | --- |
+| Android, Kotlin, Compose, ViewModel, UI review | `.agents/.skills/momens-android/SKILL.md` |
+| Task, branch, commit, PR, or GitHub migration | `.agents/.skills/momens-workflow/SKILL.md` |
+| Compose implementation details | `.agents/.skills/momens-android/references/compose-basic-flow.md` and `.agents/.skills/momens-android/references/momens-project-flow.md` |
+| Project-specific Compose workflow | `docs/compose/README.md` |
+| ktlint, formatting, or Windows/macOS environment issues | `docs/development/ktlint-environment.md` |
 
-- Language: Kotlin
-- UI: Jetpack Compose
-- Architecture: MVVM
-- State management: ViewModel + StateFlow
-- Dependency injection: Hilt
-- Code style: ktlint + `.editorconfig`
+Codex must use the applicable Momens skill. Other AI tools must read the same
+files directly.
 
-## Where To Start
+## Rule Precedence
 
-Before making changes, inspect the relevant feature package and follow the existing implementation style.
+Apply instructions in this order:
 
-For Compose screen work, prefer this structure:
+1. The user's current request
+2. This file's safety, scope, and validation rules
+3. The applicable Momens skill and its required references
+4. Existing code style in the relevant feature
 
-- `XxxRoute`: Connects the ViewModel, collects UiState, handles SideEffects, and wires navigation callbacks.
-- `XxxScreen` or `XxxContent`: Receives UiState and event lambdas, then renders UI only.
-- `component`: Contains reusable UI units.
+If two project instructions conflict and the order above does not resolve it,
+stop and ask before changing code.
 
-## Required Guide
+## Before Editing
 
-For Android and Compose work, use this guide:
+- Inspect the relevant feature package and existing implementation style.
+- Run `git status`; preserve unrelated uncommitted work. Do not modify, stage,
+  discard, or revert it.
+- Keep changes within the requested scope. Avoid unrelated refactors.
+
+## Do Not
+
+- Do not run destructive Git commands, force-push, delete branches, or discard
+  changes unless the user explicitly requests it.
+- Do not claim a build, test, lint check, task update, commit, or PR succeeded
+  unless it actually ran and succeeded.
+- Do not invent Momens task labels, assignees, PR URLs, issue links, or test
+  results.
+- Do not expose API response models directly to UI code.
+- Do not create a new design-system component before checking whether an
+  existing component meets the need.
+
+## Android and Compose Rules
+
+- Keep screen state and business logic in the ViewModel.
+- Keep Composables focused on rendering state; send events upward through lambdas.
+- Follow Route / Screen / Component responsibilities. Reusable components must
+  not reference a ViewModel or NavController.
+- Prefer existing design-system components and `MomensTheme`.
+- Add or update a Preview for a new screen, reusable Composable, or visual
+  state branch such as Loading, Empty, Error, or selection. A simple text,
+  color, or spacing change can use an existing representative Preview.
+- If a required Preview is impractical, explain why in the PR.
+
+## Validation
+
+- Kotlin or Compose changes: run the platform-appropriate Gradle Wrapper
+  command for `:app:ktlintCheck`.
+- UI state, ViewModel, navigation, build, or other compile-sensitive changes:
+  also run the platform-appropriate Gradle Wrapper command for
+  `:app:compileDebugKotlin`.
+- Run the smallest relevant test set when tests exist.
+- If no relevant automated test exists, state that and record the validation
+  that did run in the PR.
+- Documentation-only changes:
+  1. While changes are unstaged, run `git diff --check`.
+  2. Before committing, stage only in-scope files and run
+     `git diff --cached --check`; this includes newly added files.
+  3. Before updating a PR, run `git diff --check origin/develop...HEAD`, or
+     replace `origin/develop` with the actual PR base, to check the committed
+     PR diff.
+  When changing a link, file path, or command, verify that its target exists
+  or the command is valid.
+- Use the platform-appropriate Gradle Wrapper command from
+  `docs/development/ktlint-environment.md`; it contains the exact macOS, Linux, and
+  Windows commands. Gradle `ktlintCheck` is the final formatting authority,
+  not IDE reformatting.
+
+## Momens and GitHub Workflow
+
+Momens is the source of truth for work tracking. Create and reference Momens
+tasks (`MOM-0000`) instead of GitHub issues for normal work.
 
 ```text
-.agents/.skills/momens-android/SKILL.md
+branch: type/MOM-0000-short-summary
+commit: [TYPE/MOM-0000] Summary
+PR:     [TYPE/MOM-0000] Summary
 ```
 
-For Momens task, branch, commit, PR, and GitHub migration workflow, use this guide:
+`TYPE` in commits and PR titles must be uppercase. Use the PR template and
+record only validation that actually ran.
+
+## Repository Landmarks
 
 ```text
-.agents/.skills/momens-workflow/SKILL.md
-```
+app/src/main/java/com/momens/android/
+├── core/          # shared infrastructure and design system
+├── data/          # remote, local, repository implementations
+└── presentation/  # Compose features, ViewModels, UI state
 
-Use these documents as the source of truth for Compose work:
-
-```text
-.agents/.skills/momens-android/references/compose-basic-flow.md
-.agents/.skills/momens-android/references/momens-project-flow.md
-```
-
-## Basic Rules
-
-- Check the existing project structure and naming before editing.
-- Do not modify files outside the requested scope.
-- Avoid unnecessarily large refactors.
-- Keep screen state in the ViewModel.
-- Keep Composables focused on rendering state.
-- Send events upward through lambdas.
-- Do not reference ViewModel or NavController directly from reusable components.
-- Prefer the design system and `MomensTheme`.
-- Follow ktlint and `.editorconfig` rules.
-
-## Pull Request Rules
-
-When an AI agent writes a PR title, use this format:
-
-```text
-[TYPE/MOM-0000] Summary
-```
-
-`TYPE` must be uppercase.
-
-Example:
-
-```text
-[FEAT/MOM-0735] FileListItem 컴포넌트 구현
-```
-
-Work management is handled in Momens. Create and reference Momens tasks
-(`MOM-0000`) instead of GitHub issues for new work.
-
-## Current Project Layout
-
-```text
-Momens/
-├── AGENTS.md
-├── .agents/
-│   └── .skills/
-│       ├── momens-android/
-│       │   ├── SKILL.md
-│       │   └── references/
-│       │       ├── compose-basic-flow.md
-│       │       └── momens-project-flow.md
-│       └── momens-workflow/
-│           └── SKILL.md
-├── .codex/
-│   ├── config.toml
-│   └── agents/
-│       ├── momens-explorer.toml
-│       ├── momens-reviewer.toml
-│       ├── code-reviewer.toml
-│       └── pr-writer.toml
-├── .claude/
-│   ├── config.toml
-│   └── agents/
-│       ├── momens-explorer.toml
-│       ├── momens-reviewer.toml
-│       ├── code-reviewer.toml
-│       └── pr-writer.toml
-│
-├── app/
-│   └── src/main/java/com/momens/android/
-│       ├── core/
-│       ├── data/
-│       └── presentation/
-│
-├── .editorconfig
-├── build.gradle.kts
-├── settings.gradle.kts
-└── README.md
+.agents/.skills/      # Momens Android and workflow guides
+docs/compose/         # Compose architecture, UI, and feature workflows
+docs/development/     # development-environment troubleshooting guides
 ```

@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
-    projectManager: ProjectManager,
+    private val projectManager: ProjectManager,
     private val taskRepository: TaskRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<TaskUiState>>(UiState.Loading)
@@ -49,7 +49,7 @@ class TaskViewModel @Inject constructor(
 
     fun loadTaskBoard(projectId: String?) {
         boardJob?.cancel()
-        if (projectId.isNullOrBlank()) {
+        if (projectId.isNullOrBlank() || projectId != projectManager.currentProjectContext.projectId) {
             boardProjectId = null
             _uiState.value = UiState.Empty
             return
@@ -62,12 +62,12 @@ class TaskViewModel @Inject constructor(
             taskRepository.getTaskBoard(projectId)
                 .mapCatching { it.toUiModel() }
                 .onSuccess { board ->
-                    if (boardProjectId == projectId) {
+                    if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
                         _uiState.value = UiState.Success(board)
                     }
                 }
                 .onLogFailure("Failed to load TaskBoard") {
-                    if (boardProjectId == projectId) {
+                    if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
                         _uiState.value = UiState.Failure
                         _sideEffect.emit(TaskSideEffect.ShowSnackbar("태스크를 불러오지 못했습니다"))
                     }
@@ -80,7 +80,7 @@ class TaskViewModel @Inject constructor(
         role: MomensTaskButtonType,
         priority: ImportantLevel,
     ) {
-        val projectId = projectContext.value.projectId ?: return
+        val projectId = projectManager.currentProjectContext.projectId ?: return
         if (projectId != boardProjectId || _isCreatingTask.value) return
         if (_uiState.value !is UiState.Success) return
 
@@ -98,7 +98,9 @@ class TaskViewModel @Inject constructor(
                 )
                     .mapCatching { it.toUiModel() }
                     .onSuccess { newTask ->
-                        if (boardProjectId != projectId) return@onSuccess
+                        if (boardProjectId != projectId || projectManager.currentProjectContext.projectId != projectId) {
+                            return@onSuccess
+                        }
 
                         val currentBoard = (_uiState.value as? UiState.Success)?.data
                             ?: return@onSuccess
@@ -125,7 +127,7 @@ class TaskViewModel @Inject constructor(
                         )
                     }
                     .onLogFailure("Failed to create task") {
-                        if (boardProjectId == projectId) {
+                        if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
                             _sideEffect.emit(TaskSideEffect.ShowSnackbar("태스크 등록에 실패했습니다"))
                         }
                     }
