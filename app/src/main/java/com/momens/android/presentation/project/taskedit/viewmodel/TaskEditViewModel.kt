@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.momens.android.core.common.extension.updateSuccess
+import com.momens.android.core.common.state.UiState
+import com.momens.android.core.common.util.successData
 import com.momens.android.core.designsystem.component.type.ImportantLevel
 import com.momens.android.core.designsystem.component.type.MomensStatusEditType
 import com.momens.android.core.local.project.ProjectManager
@@ -29,7 +32,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -39,7 +41,7 @@ class TaskEditViewModel @Inject constructor(
     projectManager: ProjectManager,
     savedStateHandle: SavedStateHandle,
     private val taskEditRepository: TaskEditRepository,
-    taskDetailRepository: TaskDetailRepository,
+    private val taskDetailRepository: TaskDetailRepository,
 ) : ViewModel() {
     val projectContext = projectManager.observeProjectContext().stateIn(
         scope = viewModelScope,
@@ -48,39 +50,67 @@ class TaskEditViewModel @Inject constructor(
     )
 
     private val taskId: String = savedStateHandle.toRoute<TaskEdit>().taskId
-    private val initialTask = taskDetailRepository.cachedTaskDetail.value!!.toUiModel().toEditTask()
+    private val cachedTask = taskDetailRepository.cachedTaskDetail.value
+        ?.takeIf { it.id == taskId }
+        ?.toUiModel()
+        ?.toEditTask()
 
-    private val _state = MutableStateFlow(
-        TaskEditState(
-            task = initialTask,
-            assignees = persistentListOf(),
-        ),
+    private val _state = MutableStateFlow<UiState<TaskEditState>>(
+        if (cachedTask != null) {
+            UiState.Success(TaskEditState(task = cachedTask, assignees = persistentListOf()))
+        } else {
+            UiState.Loading
+        },
     )
     val state = _state.asStateFlow()
 
     private val _sideEffect = MutableSharedFlow<TaskEditSideEffect>()
     val sideEffect = _sideEffect.asSharedFlow()
 
+    init {
+        if (cachedTask == null) loadTask()
+    }
+
+    private fun loadTask() {
+        viewModelScope.launch {
+            taskDetailRepository.getTaskDetail(taskId = taskId)
+                .onSuccess { detail ->
+                    _state.value = UiState.Success(
+                        TaskEditState(
+                            task = detail.toUiModel().toEditTask(),
+                            assignees = persistentListOf(),
+                        ),
+                    )
+                }
+                .onFailure {
+                    _state.value = UiState.Failure
+                    _sideEffect.emit(TaskEditSideEffect.ShowSnackBar(message = "태스크 정보를 불러보지 못했습니다."))
+                }
+        }
+    }
+
     fun changeRole(role: TaskRole) {
-        _state.update {
-            it.copy(task = it.task.copy(role = role))
+        _state.updateSuccess { taskEditState ->
+            taskEditState.copy(task = taskEditState.task.copy(role = role))
         }
     }
 
     fun changePriority(priority: ImportantLevel) {
-        _state.update {
-            it.copy(task = it.task.copy(priority = priority))
+        _state.updateSuccess { taskEditState ->
+            taskEditState.copy(task = taskEditState.task.copy(priority = priority))
         }
     }
 
     fun changeStatus(status: MomensStatusEditType) {
-        _state.update {
-            it.copy(task = it.task.copy(status = status))
+        _state.updateSuccess { taskEditState ->
+            taskEditState.copy(task = taskEditState.task.copy(status = status))
         }
     }
 
     fun addChecklistItem() {
-        if (_state.value.task.checklistTotalCount >= 5) {
+        val currentTask = _state.value.successData?.task ?: return
+
+        if (currentTask.checklistTotalCount >= 5) {
             viewModelScope.launch {
                 _sideEffect.emit(
                     TaskEditSideEffect.ShowSnackBar(
@@ -91,36 +121,36 @@ class TaskEditViewModel @Inject constructor(
             return
         }
 
-        _state.update {
+        _state.updateSuccess { taskEditState ->
             val newItem = ChecklistItemState(
                 id = null,
                 localId = UUID.randomUUID().toString(),
                 title = "",
                 completed = false,
             )
-            it.copy(
-                task = it.task.copy(
-                    checklist = it.task.checklist.add(newItem),
+            taskEditState.copy(
+                task = taskEditState.task.copy(
+                    checklist = taskEditState.task.checklist.add(newItem),
                 ),
             )
         }
     }
 
     fun clearChecklistItem(localId: String) {
-        _state.update { state ->
-            state.copy(
-                task = state.task.copy(
-                    checklist = state.task.checklist.removeAll { it.localId == localId },
+        _state.updateSuccess { taskEditState ->
+            taskEditState.copy(
+                task = taskEditState.task.copy(
+                    checklist = taskEditState.task.checklist.removeAll { it.localId == localId },
                 ),
             )
         }
     }
 
     fun updateChecklistTitle(localId: String, title: String) {
-        _state.update { state ->
-            state.copy(
-                task = state.task.copy(
-                    checklist = state.task.checklist.map {
+        _state.updateSuccess { taskEditState ->
+            taskEditState.copy(
+                task = taskEditState.task.copy(
+                    checklist = taskEditState.task.checklist.map {
                         if (it.localId == localId) it.copy(title = title) else it
                     }.toPersistentList(),
                 ),
@@ -129,10 +159,10 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun changeCheck(localId: String, checked: Boolean) {
-        _state.update { state ->
-            state.copy(
-                task = state.task.copy(
-                    checklist = state.task.checklist.map {
+        _state.updateSuccess { taskEditState ->
+            taskEditState.copy(
+                task = taskEditState.task.copy(
+                    checklist = taskEditState.task.checklist.map {
                         if (it.localId == localId) it.copy(completed = checked) else it
                     }.toPersistentList(),
                 ),
@@ -141,24 +171,26 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun reorderChecklist(fromIndex: Int, toIndex: Int) {
-        _state.update { state ->
-            val checklist = state.task.checklist
-            if (fromIndex !in checklist.indices || toIndex !in checklist.indices) return@update state
+        _state.updateSuccess { taskEditState ->
+            val checklist = taskEditState.task.checklist
+            if (fromIndex !in checklist.indices || toIndex !in checklist.indices) {
+                return@updateSuccess taskEditState
+            }
 
             val reordered = checklist.toMutableList().apply {
                 add(toIndex, removeAt(fromIndex))
             }.toPersistentList()
 
-            state.copy(task = state.task.copy(checklist = reordered))
+            taskEditState.copy(task = taskEditState.task.copy(checklist = reordered))
         }
     }
 
     fun updateAssignee(assignee: Assignee) {
-        _state.update { it.copy(task = it.task.copy(assignee = assignee)) }
+        _state.updateSuccess { it.copy(task = it.task.copy(assignee = assignee)) }
     }
 
     fun removeAssignee() {
-        _state.update { it.copy(task = it.task.copy(assignee = null)) }
+        _state.updateSuccess { it.copy(task = it.task.copy(assignee = null)) }
     }
 
     fun getAssignees(search: String) {
@@ -172,7 +204,7 @@ class TaskEditViewModel @Inject constructor(
                 projectId = projectId,
                 query = search.ifBlank { null },
             ).onSuccess { response ->
-                _state.update {
+                _state.updateSuccess {
                     it.copy(
                         assignees = response.map { member ->
                             member.toAssignee()
@@ -194,19 +226,21 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun saveTask(title: String, purpose: String) {
-        if (_state.value.isSaving) return
+        if (_state.value.successData?.isSaving == true) return
 
-        _state.update {
+        _state.updateSuccess {
             it.copy(
                 task = it.task.copy(titleState = title.ifBlank { "새 태스크" }, purposeState = purpose),
-                isSaving = true
+                isSaving = true,
             )
         }
+
+        val task = _state.value.successData?.task ?: return
 
         viewModelScope.launch {
             taskEditRepository.patchTaskEdit(
                 taskId = taskId,
-                request = _state.value.task.toTaskEditModel(),
+                request = task.toTaskEditModel(),
             ).onSuccess {
                 _sideEffect.emit(
                     TaskEditSideEffect.ShowSnackBar(
@@ -221,7 +255,7 @@ class TaskEditViewModel @Inject constructor(
                     ),
                 )
             }
-            _state.update { it.copy(isSaving = false) }
+            _state.updateSuccess { it.copy(isSaving = false) }
         }
     }
 }
