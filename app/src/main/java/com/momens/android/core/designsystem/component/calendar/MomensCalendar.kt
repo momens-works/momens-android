@@ -1,6 +1,7 @@
 package com.momens.android.core.designsystem.component.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.momens.android.R
 import com.momens.android.core.common.extension.noRippleClickable
+import com.momens.android.core.designsystem.component.button.MomensToggleButton
 import com.momens.android.core.designsystem.theme.MomensTheme
 import java.time.LocalDate
 import java.time.YearMonth
@@ -251,110 +253,55 @@ private fun CalendarDateCell(
     }
 }
 
-@Preview(name = "Original date cell", showBackground = true)
+@Preview(name = "MomensCalendar", showBackground = true)
 @Composable
-private fun CalendarOriginalDateCellPreview() {
+private fun MomensCalendarPreview() {
+    var yearMonth by remember { mutableStateOf(YearMonth.of(2027, 1)) }
+    var selectionMode by remember { mutableStateOf(CalendarSelectionMode.RANGE) }
+    var selection by remember {
+        mutableStateOf<CalendarSelection>(
+            CalendarSelection.Range(
+                start = LocalDate.of(2027, 1, 9),
+                end = LocalDate.of(2027, 1, 11),
+            ),
+        )
+    }
+
     MomensTheme {
-        Box(modifier = Modifier.size(42.dp)) {
-            CalendarDateCell(
-                date = LocalDate.of(2026, 10, 1),
-                state = CalendarDateState.ORIGINAL,
-                onClick = {},
+        Column(
+            modifier = Modifier
+                .width(320.dp)
+                .background(MomensTheme.colors.white),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                CalendarSelectionMode.entries.forEach { mode ->
+                    MomensToggleButton(
+                        text = when (mode) {
+                            CalendarSelectionMode.SINGLE -> "단일 선택"
+                            CalendarSelectionMode.RANGE -> "기간 선택"
+                        },
+                        isSelected = selectionMode == mode,
+                        onCheckedChange = { isSelected ->
+                            if (isSelected) {
+                                selectionMode = mode
+                                selection = CalendarSelection.None
+                            }
+                        },
+                    )
+                }
+            }
+
+            MomensCalendar(
+                yearMonth = yearMonth,
+                selectionMode = selectionMode,
+                selection = selection,
+                onSelectionChange = { selection = it },
+                onMonthChange = { yearMonth = it },
+                today = LocalDate.of(2027, 1, 15),
+                disabledDates = setOf(LocalDate.of(2027, 1, 13)),
+                originalDate = LocalDate.of(2027, 1, 12),
             )
         }
-    }
-}
-
-@Preview(name = "Deadline edit", showBackground = true)
-@Composable
-private fun MomensCalendarDeadlineEditPreview() {
-    var selection by remember {
-        mutableStateOf<CalendarSelection>(CalendarSelection.Single(LocalDate.of(2026, 10, 13)))
-    }
-
-    MomensTheme {
-        MomensCalendar(
-            yearMonth = YearMonth.of(2026, 10),
-            selectionMode = CalendarSelectionMode.SINGLE,
-            selection = selection,
-            onSelectionChange = { selection = it },
-            onMonthChange = {},
-            modifier = Modifier.width(320.dp),
-            today = LocalDate.of(2026, 10, 1),
-            originalDate = LocalDate.of(2026, 10, 9),
-        )
-    }
-}
-
-@Preview(name = "Default", showBackground = true)
-@Composable
-private fun MomensCalendarDefaultPreview() {
-    val today = remember { LocalDate.now() }
-
-    MomensTheme {
-        MomensCalendar(
-            yearMonth = YearMonth.from(today),
-            selectionMode = CalendarSelectionMode.SINGLE,
-            selection = CalendarSelection.Single(today),
-            today = today,
-            onSelectionChange = {},
-            onMonthChange = {},
-            modifier = Modifier.width(320.dp),
-        )
-    }
-}
-
-@Preview(name = "Selected", showBackground = true)
-@Composable
-private fun MomensCalendarSelectedPreview() {
-    MomensTheme {
-        MomensCalendar(
-            yearMonth = YearMonth.of(2026, 10),
-            selectionMode = CalendarSelectionMode.SINGLE,
-            selection = CalendarSelection.Single(LocalDate.of(2026, 10, 9)),
-            onSelectionChange = {},
-            onMonthChange = {},
-            modifier = Modifier.width(320.dp),
-            today = LocalDate.of(2026, 10, 1),
-        )
-    }
-}
-
-@Preview(name = "Range", showBackground = true)
-@Composable
-private fun MomensCalendarRangePreview() {
-    MomensTheme {
-        MomensCalendar(
-            yearMonth = YearMonth.of(2026, 10),
-            selectionMode = CalendarSelectionMode.SINGLE,
-            selection = CalendarSelection.Range(
-                start = LocalDate.of(2026, 10, 9),
-                end = LocalDate.of(2026, 10, 13),
-            ),
-            onSelectionChange = {},
-            onMonthChange = {},
-            modifier = Modifier.width(320.dp),
-            today = LocalDate.of(2026, 10, 1),
-        )
-    }
-}
-
-@Preview(name = "All states", showBackground = true, widthDp = 320, heightDp = 350)
-@Composable
-private fun MomensCalendarAllStatesPreview() {
-    val today = remember { LocalDate.now() }
-    var yearMonth by remember { mutableStateOf(YearMonth.from(today)) }
-    var selection by remember { mutableStateOf<CalendarSelection>(CalendarSelection.Single(today)) }
-
-    MomensTheme {
-        MomensCalendar(
-            yearMonth = yearMonth,
-            selectionMode = CalendarSelectionMode.SINGLE,
-            selection = selection,
-            onSelectionChange = { selection = it },
-            onMonthChange = { yearMonth = it },
-            modifier = Modifier.width(320.dp),
-            today = today,
-        )
     }
 }
