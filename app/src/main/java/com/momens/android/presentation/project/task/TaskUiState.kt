@@ -76,13 +76,18 @@ fun TaskBoard.toUiModel(): TaskUiState = TaskUiState(
 )
 
 sealed interface TaskSideEffect {
-    data class ShowActionSnackbar(
+    data class TaskCreated(
         val message: String,
         val description: String,
         val taskId: String,
     ) : TaskSideEffect
 
     data class ShowSnackbar(val message: String) : TaskSideEffect
+
+    data class TaskCreationFailed(
+        val projectId: String,
+        val message: String,
+    ) : TaskSideEffect
 
     data class NavigateToTaskDetail(val taskId: String) : TaskSideEffect
 }

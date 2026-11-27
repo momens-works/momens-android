@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.input.clearText
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +26,6 @@ import com.momens.android.core.common.state.UiState
 import com.momens.android.core.designsystem.component.button.MomensFloatingActionButton
 import com.momens.android.core.designsystem.component.header.MomensDefaultHeader
 import com.momens.android.core.designsystem.component.snackbar.model.MomensSnackbarModel
-import com.momens.android.core.designsystem.component.type.ImportantLevel
 import com.momens.android.core.designsystem.component.type.MomensSnackbarType
 import com.momens.android.core.designsystem.theme.MomensTheme
 import com.momens.android.core.designsystem.trigger.LocalGlobalUiEventTrigger
@@ -37,7 +34,7 @@ import com.momens.android.presentation.loading.LoadingScreen
 import com.momens.android.presentation.project.task.component.TaskBottomSheet
 import com.momens.android.presentation.project.task.component.TaskStatusBox
 import com.momens.android.presentation.project.task.component.TaskTitle
-import com.momens.android.presentation.project.task.model.MomensTaskButtonType
+import kotlinx.coroutines.delay
 
 @Composable
 fun TaskRoute(
@@ -52,17 +49,26 @@ fun TaskRoute(
 
     val renderState = rememberMinDurationUiState(uiState)
     var pendingActionSnackbar by remember { mutableStateOf<SnackbarState?>(null) }
-    var createdTaskCount by remember { mutableStateOf(0) }
+    var showTaskBottomSheet by remember { mutableStateOf(false) }
+    var sheetProjectId by remember { mutableStateOf<String?>(null) }
+    var sheetErrorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(projectContext.projectId) {
         viewModel.loadTaskBoard(projectContext.projectId)
+        if (!isCreatingTask && sheetProjectId != projectContext.projectId) {
+            showTaskBottomSheet = false
+            sheetProjectId = null
+            sheetErrorMessage = null
+        }
     }
 
     LaunchedEffect(viewModel) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
-                is TaskSideEffect.ShowActionSnackbar -> {
-                    createdTaskCount++
+                is TaskSideEffect.TaskCreated -> {
+                    showTaskBottomSheet = false
+                    sheetProjectId = null
+                    sheetErrorMessage = null
                     pendingActionSnackbar = SnackbarState(
                         content = MomensSnackbarModel(
                             title = effect.message,
@@ -79,16 +85,37 @@ fun TaskRoute(
                     )
                 }
 
+                is TaskSideEffect.TaskCreationFailed -> {
+                    if (showTaskBottomSheet && sheetProjectId == effect.projectId &&
+                        viewModel.projectContext.value.projectId == effect.projectId
+                    ) {
+                        sheetErrorMessage = effect.message
+                    } else {
+                        showTaskBottomSheet = false
+                        sheetProjectId = null
+                        globalUiEvent.showSnackbar(
+                            SnackbarState(content = MomensSnackbarModel(title = effect.message)),
+                        )
+                    }
+                }
+
                 is TaskSideEffect.NavigateToTaskDetail -> navigateToTaskDetail(effect.taskId)
             }
         }
     }
 
-    LaunchedEffect(renderState, pendingActionSnackbar) {
+    LaunchedEffect(showTaskBottomSheet, pendingActionSnackbar) {
         val snackbar = pendingActionSnackbar ?: return@LaunchedEffect
-        if (renderState is UiState.Success) {
+        if (!showTaskBottomSheet) {
             globalUiEvent.showSnackbar(snackbar)
             pendingActionSnackbar = null
+        }
+    }
+
+    LaunchedEffect(sheetErrorMessage) {
+        if (sheetErrorMessage != null) {
+            delay(2_000)
+            sheetErrorMessage = null
         }
     }
 
@@ -103,12 +130,27 @@ fun TaskRoute(
                 onTaskClick = navigateToTaskDetail,
                 uiState = renderState.data,
                 avatarUrl = projectContext.avatarUrl,
-                isCreatingTask = isCreatingTask,
-                createdTaskCount = createdTaskCount,
-                onRegisterClick = viewModel::addTask,
+                onAddClick = {
+                    sheetProjectId = projectContext.projectId
+                    sheetErrorMessage = null
+                    showTaskBottomSheet = true
+                },
             )
 
         UiState.Empty -> Unit
+    }
+
+    if (showTaskBottomSheet) {
+        TaskBottomSheet(
+            isCreatingTask = isCreatingTask,
+            errorMessage = sheetErrorMessage,
+            onDismiss = {
+                showTaskBottomSheet = false
+                sheetProjectId = null
+                sheetErrorMessage = null
+            },
+            onRegisterClick = viewModel::addTask,
+        )
     }
 }
 
@@ -117,30 +159,10 @@ private fun TaskScreen(
     paddingValues: PaddingValues,
     uiState: TaskUiState,
     avatarUrl: String?,
-    isCreatingTask: Boolean,
-    createdTaskCount: Int,
     onTaskClick: (String) -> Unit,
-    onRegisterClick: (title: String, role: MomensTaskButtonType, priority: ImportantLevel) -> Unit,
+    onAddClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showTaskBottomSheet by remember { mutableStateOf(false) }
-    val titleState = rememberTextFieldState()
-    var selectedRole by remember { mutableStateOf<MomensTaskButtonType?>(null) }
-    var selectedPriority by remember { mutableStateOf<ImportantLevel?>(null) }
-
-    val resetTaskInput = {
-        titleState.clearText()
-        selectedRole = null
-        selectedPriority = null
-    }
-
-    LaunchedEffect(createdTaskCount) {
-        if (createdTaskCount > 0) {
-            resetTaskInput()
-            showTaskBottomSheet = false
-        }
-    }
-
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -183,34 +205,10 @@ private fun TaskScreen(
         }
 
         MomensFloatingActionButton(
-            onClick = { showTaskBottomSheet = true },
+            onClick = onAddClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 80.dp),
-        )
-    }
-
-    if (showTaskBottomSheet) {
-        TaskBottomSheet(
-            titleState = titleState,
-            selectedRole = selectedRole,
-            selectedPriority = selectedPriority,
-            isCreatingTask = isCreatingTask,
-            onRoleSelect = { selectedRole = it },
-            onPrioritySelect = { selectedPriority = it },
-            onDismiss = {
-                if (!isCreatingTask) {
-                    resetTaskInput()
-                    showTaskBottomSheet = false
-                }
-            },
-            onRegisterClick = {
-                onRegisterClick(
-                    titleState.text.toString(),
-                    requireNotNull(selectedRole),
-                    requireNotNull(selectedPriority),
-                )
-            },
         )
     }
 }
@@ -224,10 +222,8 @@ private fun TaskScreenPreview() {
                 paddingValues = innerPadding,
                 uiState = TaskUiState.Fake,
                 avatarUrl = null,
-                isCreatingTask = false,
-                createdTaskCount = 0,
                 onTaskClick = {},
-                onRegisterClick = { _, _, _ -> },
+                onAddClick = {},
             )
         }
     }
@@ -242,10 +238,8 @@ private fun TaskScreenEmptyPreview() {
                 paddingValues = innerPadding,
                 uiState = TaskUiState.FakeEmpty,
                 avatarUrl = null,
-                isCreatingTask = false,
-                createdTaskCount = 0,
                 onTaskClick = {},
-                onRegisterClick = { _, _, _ -> },
+                onAddClick = {},
             )
         }
     }

@@ -62,12 +62,12 @@ class TaskViewModel @Inject constructor(
             taskRepository.getTaskBoard(projectId)
                 .mapCatching { it.toUiModel() }
                 .onSuccess { board ->
-                    if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
+                    if (projectManager.currentProjectContext.projectId == projectId) {
                         _uiState.value = UiState.Success(board)
                     }
                 }
                 .onLogFailure("Failed to load TaskBoard") {
-                    if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
+                    if (projectManager.currentProjectContext.projectId == projectId) {
                         _uiState.value = UiState.Failure
                         _sideEffect.emit(TaskSideEffect.ShowSnackbar("태스크를 불러오지 못했습니다"))
                     }
@@ -98,28 +98,29 @@ class TaskViewModel @Inject constructor(
                 )
                     .mapCatching { it.toUiModel() }
                     .onSuccess { newTask ->
-                        if (boardProjectId != projectId || projectManager.currentProjectContext.projectId != projectId) {
-                            return@onSuccess
+                        if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
+                            val currentBoard = (_uiState.value as? UiState.Success)?.data
+                            if (currentBoard != null) {
+                                _uiState.value = UiState.Success(
+                                    currentBoard.copy(
+                                        sections = currentBoard.sections.map { section ->
+                                            if (section.type == MomensStatusEditType.TODO) {
+                                                section.copy(
+                                                    tasks = (listOf(newTask) + section.tasks.filterNot { it.id == newTask.id })
+                                                        .toPersistentList(),
+                                                )
+                                            } else {
+                                                section
+                                            }
+                                        }.toPersistentList(),
+                                    ),
+                                )
+                            } else {
+                                loadTaskBoard(projectId)
+                            }
                         }
-
-                        val currentBoard = (_uiState.value as? UiState.Success)?.data
-                            ?: return@onSuccess
-
-                        _uiState.value = UiState.Success(
-                            currentBoard.copy(
-                                sections = currentBoard.sections.map { section ->
-                                    if (section.type == MomensStatusEditType.TODO) {
-                                        section.copy(
-                                            tasks = (listOf(newTask) + section.tasks).toPersistentList(),
-                                        )
-                                    } else {
-                                        section
-                                    }
-                                }.toPersistentList(),
-                            ),
-                        )
                         _sideEffect.emit(
-                            TaskSideEffect.ShowActionSnackbar(
+                            TaskSideEffect.TaskCreated(
                                 message = "태스크가 등록되었습니다",
                                 description = "'투두'에 추가됨",
                                 taskId = newTask.id,
@@ -127,9 +128,12 @@ class TaskViewModel @Inject constructor(
                         )
                     }
                     .onLogFailure("Failed to create task") {
-                        if (boardProjectId == projectId && projectManager.currentProjectContext.projectId == projectId) {
-                            _sideEffect.emit(TaskSideEffect.ShowSnackbar("태스크 등록에 실패했습니다"))
-                        }
+                        _sideEffect.emit(
+                            TaskSideEffect.TaskCreationFailed(
+                                projectId = projectId,
+                                message = "태스크 등록에 실패했습니다",
+                            ),
+                        )
                     }
             } finally {
                 _isCreatingTask.value = false
