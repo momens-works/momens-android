@@ -38,7 +38,9 @@ fun MomensDefaultHeader(
         Icon(
             painter = painterResource(id = R.drawable.ic_momens_logo),
             contentDescription = null,
-            modifier = Modifier.align(Alignment.CenterStart),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .size(width = 100.dp, height = 22.dp),
             tint = Color.Unspecified,
         )
 
