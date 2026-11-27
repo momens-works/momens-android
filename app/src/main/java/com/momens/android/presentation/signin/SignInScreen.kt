@@ -23,12 +23,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.momens.android.R
 import com.momens.android.core.common.extension.collectSideEffect
-import com.momens.android.core.common.state.UiState
 import com.momens.android.core.designsystem.component.button.MomensCtaButton
 import com.momens.android.core.designsystem.component.logo.MomensLogo
 import com.momens.android.core.designsystem.component.type.MomensCtaType
 import com.momens.android.core.designsystem.theme.MomensTheme
 import com.momens.android.presentation.signin.sdk.rememberGoogleSignInLauncher
+import com.momens.android.presentation.signin.state.SignInFeedback
+import com.momens.android.presentation.signin.state.SignInSideEffect
+import com.momens.android.presentation.signin.state.SignInUiState
+import com.momens.android.presentation.signin.viewmodel.SignInViewModel
+import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun SignInRoute(
@@ -43,9 +47,12 @@ fun SignInRoute(
     viewModel.sideEffect.collectSideEffect { sideEffect ->
         when (sideEffect) {
             SignInSideEffect.LaunchGoogleSignIn -> {
-                viewModel.onGoogleSignInResult(
-                    googleSignInLauncher.launch(),
-                )
+                try {
+                    viewModel.onGoogleSignInResult(googleSignInLauncher.launch())
+                } catch (exception: CancellationException) {
+                    viewModel.onGoogleSignInInterrupted()
+                    throw exception
+                }
             }
 
             SignInSideEffect.NavigateToOnboarding -> navigateToOnboarding()
@@ -56,7 +63,7 @@ fun SignInRoute(
 
     SignInScreen(
         paddingValues = paddingValues,
-        isGoogleLoginEnabled = signInState !is UiState.Loading,
+        uiState = signInState,
         onGoogleLoginClick = viewModel::onGoogleSignInClick,
     )
 }
@@ -64,7 +71,7 @@ fun SignInRoute(
 @Composable
 private fun SignInScreen(
     paddingValues: PaddingValues,
-    isGoogleLoginEnabled: Boolean,
+    uiState: SignInUiState,
     onGoogleLoginClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -91,7 +98,7 @@ private fun SignInScreen(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 onClick = onGoogleLoginClick,
                 type = MomensCtaType.LOGIN,
-                enabled = isGoogleLoginEnabled,
+                enabled = !uiState.isLoading,
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -131,7 +138,43 @@ private fun SignInScreenPreview() {
     MomensTheme {
         SignInScreen(
             paddingValues = PaddingValues(),
-            isGoogleLoginEnabled = true,
+            uiState = SignInUiState(),
+            onGoogleLoginClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignInScreenFailurePreview() {
+    MomensTheme {
+        SignInScreen(
+            paddingValues = PaddingValues(),
+            uiState = SignInUiState(feedback = SignInFeedback.NETWORK_FAILED),
+            onGoogleLoginClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignInScreenCancelledPreview() {
+    MomensTheme {
+        SignInScreen(
+            paddingValues = PaddingValues(),
+            uiState = SignInUiState(feedback = SignInFeedback.CANCELLED),
+            onGoogleLoginClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignInScreenLoadingPreview() {
+    MomensTheme {
+        SignInScreen(
+            paddingValues = PaddingValues(),
+            uiState = SignInUiState(isLoading = true),
             onGoogleLoginClick = {},
         )
     }

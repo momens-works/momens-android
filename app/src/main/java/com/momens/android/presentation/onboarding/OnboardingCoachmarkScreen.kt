@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.momens.android.core.common.extension.collectSideEffect
 import com.momens.android.core.designsystem.theme.MomensTheme
 import com.momens.android.presentation.main.component.MomensMainTabBar
@@ -34,7 +35,7 @@ fun OnboardingRoute(
     navigateToSignal: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
-    var step by remember { mutableStateOf(OnboardingCoachmarkStep.SIGNAL_TITLE) }
+    val step by viewModel.step.collectAsStateWithLifecycle()
 
     viewModel.sideEffect.collectSideEffect {
         when (it) {
@@ -45,21 +46,7 @@ fun OnboardingRoute(
     OnboardingScreen(
         step = step,
         paddingValues = paddingValues,
-        onNextClick = {
-            when (step) {
-                OnboardingCoachmarkStep.SIGNAL_TITLE -> {
-                    step = OnboardingCoachmarkStep.SIGNAL_CARD
-                }
-
-                OnboardingCoachmarkStep.SIGNAL_CARD -> {
-                    step = OnboardingCoachmarkStep.MINSU_SUGGESTION
-                }
-
-                OnboardingCoachmarkStep.MINSU_SUGGESTION -> {
-                    viewModel.completeOnboarding()
-                }
-            }
-        }
+        onNextClick = viewModel::onNextClick,
     )
 }
 
@@ -107,7 +94,7 @@ fun OnboardingScreen(
             tabs = persistentListOf(
                 MainTab.SIGNAL,
                 MainTab.BRIEF,
-                MainTab.TASK
+                MainTab.TASK,
             ),
             selectedTab = MainTab.SIGNAL,
             onTabClick = {},
