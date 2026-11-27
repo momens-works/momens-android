@@ -93,14 +93,4 @@ class CalendarDateStateTest {
             dateState(today, selection, emptySet(), today),
         )
     }
-
-    @Test
-    fun `multiple selection highlights only chosen dates`() {
-        val selectedDate = today.plusDays(2)
-        val unselectedDate = today.plusDays(1)
-        val selection = CalendarSelection.Multiple(setOf(today, selectedDate))
-
-        assertEquals(CalendarDateState.SELECTED, dateState(selectedDate, selection, emptySet(), today))
-        assertEquals(CalendarDateState.DEFAULT, dateState(unselectedDate, selection, emptySet(), today))
-    }
 }

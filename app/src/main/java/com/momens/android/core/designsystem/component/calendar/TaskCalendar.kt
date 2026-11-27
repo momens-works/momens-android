@@ -326,7 +326,7 @@ private fun TaskCalendarRangePreview() {
     MomensTheme {
         TaskCalendar(
             yearMonth = YearMonth.of(2026, 10),
-            selectionMode = CalendarSelectionMode.MULTIPLE,
+            selectionMode = CalendarSelectionMode.SINGLE,
             selection = CalendarSelection.Range(
                 start = LocalDate.of(2026, 10, 9),
                 end = LocalDate.of(2026, 10, 13),
@@ -344,12 +344,12 @@ private fun TaskCalendarRangePreview() {
 private fun TaskCalendarAllStatesPreview() {
     val today = remember { LocalDate.now() }
     var yearMonth by remember { mutableStateOf(YearMonth.from(today)) }
-    var selection by remember { mutableStateOf<CalendarSelection>(CalendarSelection.Multiple(setOf(today))) }
+    var selection by remember { mutableStateOf<CalendarSelection>(CalendarSelection.Single(today)) }
 
     MomensTheme {
         TaskCalendar(
             yearMonth = yearMonth,
-            selectionMode = CalendarSelectionMode.MULTIPLE,
+            selectionMode = CalendarSelectionMode.SINGLE,
             selection = selection,
             onSelectionChange = { selection = it },
             onMonthChange = { yearMonth = it },

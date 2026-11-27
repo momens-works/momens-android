@@ -24,31 +24,4 @@ class CalendarSelectionTest {
             selection.selectDate(first, CalendarSelectionMode.SINGLE),
         )
     }
-
-    @Test
-    fun `multiple mode toggles nonconsecutive dates independently`() {
-        val firstSelection = CalendarSelection.None.selectDate(first, CalendarSelectionMode.MULTIPLE)
-        val secondSelection = firstSelection.selectDate(second, CalendarSelectionMode.MULTIPLE)
-
-        assertEquals(CalendarSelection.Multiple(setOf(first, second)), secondSelection)
-        assertEquals(
-            CalendarSelection.Multiple(setOf(second)),
-            secondSelection.selectDate(first, CalendarSelectionMode.MULTIPLE),
-        )
-        assertEquals(
-            CalendarSelection.None,
-            secondSelection.selectDate(first, CalendarSelectionMode.MULTIPLE)
-                .selectDate(second, CalendarSelectionMode.MULTIPLE),
-        )
-    }
-
-    @Test
-    fun `multiple mode starts a new selection after a displayed range`() {
-        val range = CalendarSelection.Range(first, first.plusDays(2))
-
-        assertEquals(
-            CalendarSelection.Multiple(setOf(second)),
-            range.selectDate(second, CalendarSelectionMode.MULTIPLE),
-        )
-    }
 }
