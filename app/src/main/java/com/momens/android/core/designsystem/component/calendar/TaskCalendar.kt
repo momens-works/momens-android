@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,12 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,12 +62,10 @@ fun TaskCalendar(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp)
-                .height(1.dp)
-                .background(MomensTheme.colors.gray200),
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 10.dp),
+            thickness = 1.dp,
+            color = MomensTheme.colors.gray200,
         )
 
         Spacer(modifier = Modifier.height(3.dp))
@@ -165,16 +164,13 @@ private fun CalendarWeekdayHeader(modifier: Modifier = Modifier) {
                 6 -> MomensTheme.colors.primary50
                 else -> MomensTheme.colors.black
             }
-            Box(
+            Text(
+                text = label,
                 modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = label,
-                    color = color,
-                    style = MomensTheme.typography.captionM10,
-                )
-            }
+                color = color,
+                style = MomensTheme.typography.captionM10,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
@@ -187,16 +183,20 @@ private fun CalendarDateCell(
     modifier: Modifier = Modifier,
 ) {
     val shape = when (state) {
-        CalendarDateState.TODAY,
         CalendarDateState.SELECTED,
         CalendarDateState.ORIGINAL,
             -> RoundedCornerShape(10.dp)
 
         CalendarDateState.RANGE_START -> RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp)
         CalendarDateState.RANGE_END -> RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
-        CalendarDateState.RANGE_MIDDLE -> RoundedCornerShape(0.dp)
-        else -> RoundedCornerShape(80.dp)
+
+        CalendarDateState.TODAY,
+        CalendarDateState.RANGE_MIDDLE,
+        CalendarDateState.DEFAULT,
+        CalendarDateState.DISABLED,
+            -> RectangleShape
     }
+
     val background = when (state) {
         CalendarDateState.SELECTED,
         CalendarDateState.RANGE_START,
@@ -207,6 +207,7 @@ private fun CalendarDateCell(
         CalendarDateState.ORIGINAL -> MomensTheme.colors.gray200
         else -> Color.Transparent
     }
+
     val textColor = when (state) {
         CalendarDateState.SELECTED,
         CalendarDateState.ORIGINAL,
@@ -228,24 +229,16 @@ private fun CalendarDateCell(
             .clip(shape)
             .background(background)
             .then(
-                if (state == CalendarDateState.DISABLED) Modifier else Modifier.noRippleClickable(onClick = onClick),
+                if (state == CalendarDateState.DISABLED) Modifier
+                else Modifier.noRippleClickable(onClick = onClick),
             )
             .semantics {
                 selected = state == CalendarDateState.SELECTED ||
                     state == CalendarDateState.RANGE_START ||
                     state == CalendarDateState.RANGE_MIDDLE ||
                     state == CalendarDateState.RANGE_END
-                when (state) {
-                    CalendarDateState.ORIGINAL -> stateDescription = "기존 날짜"
-                    CalendarDateState.RANGE_START -> stateDescription = "범위 시작"
-                    CalendarDateState.RANGE_MIDDLE -> stateDescription = "범위 중간"
-                    CalendarDateState.RANGE_END -> stateDescription = "범위 끝"
-                    CalendarDateState.DISABLED -> {
-                        disabled()
-                        stateDescription = "선택할 수 없음"
-                    }
-
-                    else -> Unit
+                if (state == CalendarDateState.DISABLED) {
+                    disabled()
                 }
             },
         contentAlignment = Alignment.Center,
