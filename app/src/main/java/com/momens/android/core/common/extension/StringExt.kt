@@ -19,10 +19,6 @@ fun String?.toRelativeTimeText(): String {
     }.getOrDefault("-")
 }
 
-/**
- * ISO 8601 UTC 문자열(예: "2026-07-15T13:48:47Z")을 KST 기준
- * "yyyy.MM.dd HH:mm" 형식으로 변환합니다.
- */
 fun String?.toKstDateTimeText(): String {
     if (this.isNullOrBlank()) return "-"
     return runCatching {
@@ -32,13 +28,7 @@ fun String?.toKstDateTimeText(): String {
     }.getOrDefault("-")
 }
 
-/**
- * 공백을 포함한 글자 수 기준으로 [maxLength]를 초과하지 않도록 자릅니다.
- */
 fun String.limitLength(maxLength: Int): String = if (length > maxLength) take(maxLength) else this
 
-/**
- * 공백을 포함한 글자 수가 [maxLength]를 넘으면 앞 `maxLength - 1`자 뒤에 `…`를 붙여 총 [maxLength]자로 줄입니다.
- */
 fun String.ellipsize(maxLength: Int): String =
     if (length > maxLength) take(maxLength - 1) + "…" else this
