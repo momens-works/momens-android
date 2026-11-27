@@ -43,6 +43,7 @@ import com.momens.android.presentation.project.taskdetail.model.TaskDetailModel
 import com.momens.android.presentation.project.taskdetail.state.TaskDetailSideEffect
 import com.momens.android.presentation.project.taskdetail.state.TaskDetailState
 import com.momens.android.presentation.project.taskdetail.viewmodel.TaskDetailViewModel
+import kotlinx.collections.immutable.ImmutableSet
 
 @Composable
 fun TaskDetailRoute(
@@ -115,6 +116,7 @@ private fun TaskDetailScreen(
         state.taskDetail?.let { taskDetail ->
             TaskDetailContent(
                 taskDetail = taskDetail,
+                mutatingChecklistItemIds = state.mutatingChecklistItemIds,
                 onCheck = onCheck,
                 onFileClick = { selectedFile = it },
             )
@@ -133,6 +135,7 @@ private fun TaskDetailScreen(
 @Composable
 private fun TaskDetailContent(
     taskDetail: TaskDetailModel,
+    mutatingChecklistItemIds: ImmutableSet<String>,
     onCheck: (String, Boolean) -> Unit,
     onFileClick: (TaskDetailFileModel) -> Unit,
     modifier: Modifier = Modifier,
@@ -173,6 +176,7 @@ private fun TaskDetailContent(
                 completedCount = taskDetail.checklist.completedCount,
                 totalCount = taskDetail.checklist.totalCount,
                 items = taskDetail.checklist.items,
+                mutatingItemIds = mutatingChecklistItemIds,
                 onCheckedChange = onCheck,
                 modifier = Modifier
                     .padding(horizontal = 20.dp),

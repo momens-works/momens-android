@@ -1,11 +1,13 @@
 package com.momens.android.core.designsystem.component.snackbar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,13 +37,6 @@ fun MomensSnackbar(
             .background(
                 color = MomensTheme.colors.gray700,
                 shape = RoundedCornerShape(8.dp),
-            )
-            .then(
-                if (content.type == MomensSnackbarType.BUTTON) {
-                    Modifier.noRippleClickable(onClick = content.onActionClick)
-                } else {
-                    Modifier
-                },
             )
             .padding(
                 horizontal = 14.dp,
@@ -73,11 +68,18 @@ fun MomensSnackbar(
                     modifier = Modifier.weight(1f),
                 )
 
-                MomensButton(
-                    text = "바로보기",
-                    onClick = content.onActionClick,
-                    type = MomensButtonType.PRIMARY,
-                )
+                Box(
+                    modifier = Modifier
+                        .heightIn(min = 30.dp)
+                        .noRippleClickable(onClick = content.onActionClick),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    MomensButton(
+                        text = "바로보기",
+                        onClick = content.onActionClick,
+                        type = MomensButtonType.PRIMARY,
+                    )
+                }
             }
         }
     }

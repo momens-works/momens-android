@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import coil3.util.CoilUtils.result
 import com.momens.android.core.common.extension.updateSuccess
 import com.momens.android.core.common.state.UiState
 import com.momens.android.core.common.util.successData
@@ -14,8 +15,8 @@ import com.momens.android.presentation.project.taskdetail.navigation.TaskDetail
 import com.momens.android.presentation.project.taskdetail.state.TaskDetailSideEffect
 import com.momens.android.presentation.project.taskdetail.state.TaskDetailState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class TaskDetailViewModel @Inject constructor(
@@ -58,6 +60,27 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     fun toggleChecklistItem(itemId: String, completed: Boolean) {
+        val state = _state.value.successData ?: return
+        if (itemId in state.mutatingChecklistItemIds) return
+        val previousChecklist = state.taskDetail?.checklist ?: return
+
+        _state.updateSuccess { current ->
+            val optimisticItems = previousChecklist.items.map { item ->
+                if (item.id == itemId) item.copy(completed = completed) else item
+            }.toPersistentList()
+
+            current.copy(
+                taskDetail = current.taskDetail?.copy(
+                    checklist = previousChecklist.copy(
+                        completedCount = if (completed) previousChecklist.completedCount + 1
+                        else previousChecklist.completedCount - 1,
+                        items = optimisticItems,
+                    ),
+                ),
+                mutatingChecklistItemIds = (current.mutatingChecklistItemIds + itemId).toPersistentSet(),
+            )
+        }
+
         viewModelScope.launch {
             taskDetailRepository.updateChecklistItem(
                 taskId = taskId,
@@ -65,29 +88,46 @@ class TaskDetailViewModel @Inject constructor(
                 completed = completed,
             )
                 .onSuccess { result ->
-                    _state.updateSuccess { state ->
-                        val current = state.taskDetail ?: return@updateSuccess state
-
-                        val updatedItems = current.checklist.items
-                            .map { item ->
-                                if (item.id == result.item.id) result.item.toUiModel() else item
-                            }
+                    _state.updateSuccess { current ->
+                        val currentChecklist = current.taskDetail?.checklist ?: return@updateSuccess current
+                        val newItems = currentChecklist.items
+                            .map { if (it.id == result.item.id) result.item.toUiModel() else it }
                             .toPersistentList()
 
-                        state.copy(
-                            taskDetail = current.copy(
-                                checklist = current.checklist.copy(
-                                    completedCount = result.completedCount,
+                        current.copy(
+                            taskDetail = current.taskDetail?.copy(
+                                checklist = currentChecklist.copy(
+                                    completedCount = newItems.count {it.completed},
                                     totalCount = result.totalCount,
-                                    items = updatedItems,
+                                    items = currentChecklist.items
+                                        .map { if (it.id == result.item.id) result.item.toUiModel() else it }
+                                        .toPersistentList(),
                                 ),
                             ),
                         )
                     }
                 }
                 .onFailure {
+                    _state.updateSuccess { current ->
+                        val currentChecklist = current.taskDetail?.checklist ?: return@updateSuccess current
+                        val rollBackItems = currentChecklist.items
+                            .map { if (it.id == itemId) it.copy(completed = !completed) else it }
+                            .toPersistentList()
+
+                        current.copy(
+                            taskDetail = current.taskDetail?.copy(
+                                checklist = currentChecklist.copy(
+                                    completedCount = rollBackItems.count { it.completed },
+                                    items = rollBackItems
+                                ),
+                            ),
+                        )
+                    }
                     _sideEffect.emit(TaskDetailSideEffect.ShowSnackbar(message = "완료 상태 변경에 실패했습니다."))
                 }
+            _state.updateSuccess { current ->
+                current.copy(mutatingChecklistItemIds = (current.mutatingChecklistItemIds - itemId).toPersistentSet())
+            }
         }
     }
 }

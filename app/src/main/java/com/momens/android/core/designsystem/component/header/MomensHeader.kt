@@ -27,6 +27,7 @@ fun MomensHeader(
     backgroundColor: Color = MomensTheme.colors.white,
     isSaveVisible: Boolean = false,
     isWriteVisible: Boolean = false,
+    isSaveEnabled: Boolean = true,
     onWriteClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
 ) {
@@ -34,7 +35,7 @@ fun MomensHeader(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(horizontal = 19.dp, vertical = 12.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_next),
@@ -71,7 +72,10 @@ fun MomensHeader(
                 color = MomensTheme.colors.gray900,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .noRippleClickable(onClick = onSaveClick)
+                    .noRippleClickable(
+                        enabled = isSaveEnabled,
+                        onClick = onSaveClick
+                    )
             )
         }
     }

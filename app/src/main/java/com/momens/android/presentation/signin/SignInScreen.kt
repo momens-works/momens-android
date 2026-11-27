@@ -17,12 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,12 +27,12 @@ import com.momens.android.core.designsystem.component.button.MomensCtaButton
 import com.momens.android.core.designsystem.component.logo.MomensLogo
 import com.momens.android.core.designsystem.component.type.MomensCtaType
 import com.momens.android.core.designsystem.theme.MomensTheme
-import com.momens.android.core.sdk.google.rememberGoogleSignInLauncher
+import com.momens.android.presentation.signin.sdk.rememberGoogleSignInLauncher
 import com.momens.android.presentation.signin.state.SignInFeedback
 import com.momens.android.presentation.signin.state.SignInSideEffect
 import com.momens.android.presentation.signin.state.SignInUiState
 import com.momens.android.presentation.signin.viewmodel.SignInViewModel
-import kotlinx.coroutines.CancellationException
+import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun SignInRoute(
@@ -100,27 +94,8 @@ private fun SignInScreen(
         ) {
             Spacer(modifier = Modifier.weight(273f))
 
-            uiState.feedback?.let { feedback ->
-                Text(
-                    text = when (feedback) {
-                        SignInFeedback.CANCELLED -> "로그인을 취소했어요. 계속하려면 Google 로그인 버튼을 눌러주세요."
-                        SignInFeedback.AUTHENTICATION_FAILED -> "Google 인증에 실패했어요. 계정을 확인하고 다시 시도해 주세요."
-                        SignInFeedback.NETWORK_FAILED -> "연결에 실패했어요. 네트워크 상태를 확인하고 다시 시도해 주세요."
-                        SignInFeedback.SERVICE_FAILED -> "로그인을 완료하지 못했어요. 잠시 후 다시 시도해 주세요."
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
-                        .semantics { liveRegion = LiveRegionMode.Polite },
-                    color = MomensTheme.colors.white,
-                    style = MomensTheme.typography.bodyB16,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
             MomensCtaButton(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .semantics { role = Role.Button },
+                modifier = Modifier.padding(horizontal = 20.dp),
                 onClick = onGoogleLoginClick,
                 type = MomensCtaType.LOGIN,
                 enabled = !uiState.isLoading,

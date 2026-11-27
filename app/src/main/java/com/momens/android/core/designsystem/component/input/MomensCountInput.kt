@@ -22,8 +22,12 @@ fun MomensCountInput(
     placeholder: String = "",
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
 ) {
-    val isError = state.text.length > maxLength
-    val counterColor = if (isError) MomensTheme.colors.pointRed else MomensTheme.colors.gray400
+    val length = state.text.length
+    val counterColor = when {
+        length == 0 -> MomensTheme.colors.gray300
+        length >= maxLength -> MomensTheme.colors.pointRed
+        else -> MomensTheme.colors.gray400
+    }
 
     MomensInput(
         state = state,
@@ -33,7 +37,7 @@ fun MomensCountInput(
         maxLength = maxLength,
         trailingContent = {
             Text(
-                text = "${state.text.length}/$maxLength",
+                text = "$length/$maxLength",
                 style = MomensTheme.typography.bodyM12,
                 color = counterColor,
             )
@@ -45,8 +49,9 @@ fun MomensCountInput(
 @Composable
 private fun MomensCountInputPreview() {
     MomensTheme {
-        val normalState = rememberTextFieldState(initialText = "Write")
-        val errorState = rememberTextFieldState(initialText = "Write")
+        val emptyState = rememberTextFieldState()
+        val normalState = rememberTextFieldState(initialText = "Title")
+        val maxState = rememberTextFieldState(initialText = "Maximum length!")
 
         Column(
             modifier = Modifier
@@ -55,15 +60,21 @@ private fun MomensCountInputPreview() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             MomensCountInput(
-                state = normalState,
-                placeholder = "Write",
+                state = emptyState,
+                placeholder = "Title",
                 maxLength = 15,
             )
 
             MomensCountInput(
-                state = errorState,
-                placeholder = "Write",
-                maxLength = 3,
+                state = normalState,
+                placeholder = "Title",
+                maxLength = 15,
+            )
+
+            MomensCountInput(
+                state = maxState,
+                placeholder = "Title",
+                maxLength = 15,
             )
         }
     }

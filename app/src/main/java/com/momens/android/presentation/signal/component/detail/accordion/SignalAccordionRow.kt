@@ -1,5 +1,7 @@
 package com.momens.android.presentation.signal.component.detail.accordion
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -8,8 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.momens.android.core.common.extension.ellipsize
 import com.momens.android.core.designsystem.theme.MomensTheme
 import com.momens.android.presentation.signal.model.SignalAccordionItem
+
+private const val VALUE_MAX_LENGTH = 40
 
 @Composable
 fun SignalAccordionRow(
@@ -26,7 +31,7 @@ fun SignalAccordionRow(
         Spacer(modifier = Modifier.width(20.dp))
 
         Text(
-            text = item.value,
+            text = item.value.ellipsize(VALUE_MAX_LENGTH),
             style = MomensTheme.typography.bodyM12,
             color = MomensTheme.colors.gray500,
         )
@@ -40,5 +45,22 @@ private fun SignalAccordionRowPreview() {
         SignalAccordionRow(
             item = SignalAccordionItem(title = "대상", value = "권한 요청 화면"),
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SignalAccordionRowBoundaryPreview() {
+    MomensTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // 40자: 그대로 표시
+            SignalAccordionRow(
+                item = SignalAccordionItem(title = "변화", value = "가".repeat(40)),
+            )
+            // 41자: 앞 39자 + …
+            SignalAccordionRow(
+                item = SignalAccordionItem(title = "영향", value = "가".repeat(41)),
+            )
+        }
     }
 }
