@@ -8,7 +8,6 @@ import com.momens.android.data.project.task.remote.dto.response.TaskResponse
 
 data class TaskBoard(
     val title: String,
-    val description: String,
     val groups: List<TaskGroup>,
 )
 
@@ -29,7 +28,6 @@ data class TaskItem(
 
 fun TaskBoardResponse.toModel(): TaskBoard = TaskBoard(
     title = title,
-    description = description,
     groups = groups.map { it.toModel() },
 )
 

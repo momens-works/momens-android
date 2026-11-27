@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TaskBoardResponse(
     @SerialName("title") val title: String,
-    @SerialName("description") val description: String,
     @SerialName("groups") val groups: List<TaskGroupResponse>,
 )
 
