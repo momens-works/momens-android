@@ -49,6 +49,7 @@ fun TaskCalendar(
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     disabledDates: Set<LocalDate> = emptySet(),
+    originalDate: LocalDate? = null,
 ) {
     val weeks = remember(yearMonth) { calendarWeeks(yearMonth) }
 
@@ -86,7 +87,7 @@ fun TaskCalendar(
                             if (date != null) {
                                 CalendarDateCell(
                                     date = date,
-                                    state = dateState(date, selection, disabledDates, today),
+                                    state = dateState(date, selection, disabledDates, today, originalDate),
                                     onClick = { onSelectionChange(selection.selectDate(date, selectionMode)) },
                                 )
                             }
@@ -188,6 +189,7 @@ private fun CalendarDateCell(
     val shape = when (state) {
         CalendarDateState.TODAY,
         CalendarDateState.SELECTED,
+        CalendarDateState.ORIGINAL,
             -> RoundedCornerShape(10.dp)
 
         CalendarDateState.RANGE_START -> RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp)
@@ -202,10 +204,12 @@ private fun CalendarDateCell(
             -> MomensTheme.colors.primary100
 
         CalendarDateState.RANGE_MIDDLE -> MomensTheme.colors.primary10
+        CalendarDateState.ORIGINAL -> MomensTheme.colors.gray200
         else -> Color.Transparent
     }
     val textColor = when (state) {
         CalendarDateState.SELECTED,
+        CalendarDateState.ORIGINAL,
         CalendarDateState.RANGE_START,
         CalendarDateState.RANGE_END,
             -> MomensTheme.colors.white
@@ -232,6 +236,7 @@ private fun CalendarDateCell(
                     state == CalendarDateState.RANGE_MIDDLE ||
                     state == CalendarDateState.RANGE_END
                 when (state) {
+                    CalendarDateState.ORIGINAL -> stateDescription = "기존 날짜"
                     CalendarDateState.RANGE_START -> stateDescription = "범위 시작"
                     CalendarDateState.RANGE_MIDDLE -> stateDescription = "범위 중간"
                     CalendarDateState.RANGE_END -> stateDescription = "범위 끝"
@@ -249,6 +254,41 @@ private fun CalendarDateCell(
             text = date.dayOfMonth.toString(),
             color = textColor,
             style = MomensTheme.typography.bodyM14,
+        )
+    }
+}
+
+@Preview(name = "Original date cell", showBackground = true)
+@Composable
+private fun CalendarOriginalDateCellPreview() {
+    MomensTheme {
+        Box(modifier = Modifier.size(42.dp)) {
+            CalendarDateCell(
+                date = LocalDate.of(2026, 10, 1),
+                state = CalendarDateState.ORIGINAL,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "Deadline edit", showBackground = true)
+@Composable
+private fun TaskCalendarDeadlineEditPreview() {
+    var selection by remember {
+        mutableStateOf<CalendarSelection>(CalendarSelection.Single(LocalDate.of(2026, 10, 13)))
+    }
+
+    MomensTheme {
+        TaskCalendar(
+            yearMonth = YearMonth.of(2026, 10),
+            selectionMode = CalendarSelectionMode.SINGLE,
+            selection = selection,
+            onSelectionChange = { selection = it },
+            onMonthChange = {},
+            modifier = Modifier.width(320.dp),
+            today = LocalDate.of(2026, 10, 1),
+            originalDate = LocalDate.of(2026, 10, 9),
         )
     }
 }

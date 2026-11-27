@@ -6,6 +6,7 @@ enum class CalendarDateState {
     DEFAULT,
     TODAY,
     SELECTED,
+    ORIGINAL,
     DISABLED,
     RANGE_START,
     RANGE_MIDDLE,
@@ -17,6 +18,7 @@ fun dateState(
     selection: CalendarSelection,
     disabledDates: Set<LocalDate>,
     today: LocalDate,
+    originalDate: LocalDate? = null,
 ): CalendarDateState {
     if (date in disabledDates) return CalendarDateState.DISABLED
 
@@ -33,6 +35,8 @@ fun dateState(
             }
         }
     }
+
+    if (date == originalDate) return CalendarDateState.ORIGINAL
 
     return if (date == today) CalendarDateState.TODAY else CalendarDateState.DEFAULT
 }
