@@ -61,8 +61,8 @@ class SignInViewModel @Inject constructor(
                 }
                 _signInState.value = SignInUiState(
                     feedback = when {
-                        !networkChecker.hasInternetConnection() -> SignInFeedback.NETWORK_FAILED
                         throwable is GoogleSignInCancelledException -> SignInFeedback.CANCELLED
+                        !networkChecker.hasInternetConnection() -> SignInFeedback.NETWORK_FAILED
                         throwable is IOException -> SignInFeedback.NETWORK_FAILED
                         else -> SignInFeedback.AUTHENTICATION_FAILED
                     },
