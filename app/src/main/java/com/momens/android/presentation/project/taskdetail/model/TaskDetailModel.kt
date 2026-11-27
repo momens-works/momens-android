@@ -26,6 +26,7 @@ data class TaskDetailModel(
     val materials: ImmutableList<TaskDetailFileModel>,
     val openQuestions: ImmutableList<TaskDetailQuestionModel>,
     val nextAction: String?,
+    val roles: ImmutableList<TaskRole> = listOfNotNull(role).toImmutableList(),
 )
 
 private const val TITLE_MAX_LENGTH = 15
@@ -37,7 +38,7 @@ fun TaskDetailDataModel.toUiModel(): TaskDetailModel = TaskDetailModel(
     projectId = projectId,
     title = title.limitLength(TITLE_MAX_LENGTH),
     status = status.toUiType(),
-    role = role?.toUiType(),
+    role = roles.firstOrNull()?.toUiType(),
     assignee = assignee?.toUiModel(),
     priority = priority.toUiType(),
     purpose = purpose?.limitLength(PURPOSE_MAX_LENGTH),
@@ -45,6 +46,7 @@ fun TaskDetailDataModel.toUiModel(): TaskDetailModel = TaskDetailModel(
     materials = materials.map { it.toUiModel() }.toImmutableList(),
     openQuestions = openQuestions.map { it.toUiModel() }.toImmutableList(),
     nextAction = nextAction?.limitLength(NEXT_ACTION_MAX_LENGTH),
+    roles = roles.map { it.toUiType() }.toImmutableList(),
 )
 
 private fun TaskStatusModel.toUiType(): MomensStatusEditType = when (this) {

@@ -8,7 +8,6 @@ import com.momens.android.data.project.task.remote.dto.response.TaskResponse
 
 data class TaskBoard(
     val title: String,
-    val description: String,
     val groups: List<TaskGroup>,
 )
 
@@ -22,14 +21,13 @@ data class TaskGroup(
 data class TaskItem(
     val id: String,
     val title: String,
-    val role: String?,
+    val roles: List<String>,
     val priority: String,
     val materialCount: Int,
 )
 
 fun TaskBoardResponse.toModel(): TaskBoard = TaskBoard(
     title = title,
-    description = description,
     groups = groups.map { it.toModel() },
 )
 
@@ -43,7 +41,7 @@ fun TaskGroupResponse.toModel(): TaskGroup = TaskGroup(
 fun TaskResponse.toModel(): TaskItem = TaskItem(
     id = id,
     title = title,
-    role = role,
+    roles = roles,
     priority = priority,
     materialCount = materialCount,
 )
@@ -53,7 +51,7 @@ fun TaskCreateResponse.toModel(): TaskItem = task.toModel()
 fun CreatedTaskResponse.toModel(): TaskItem = TaskItem(
     id = id,
     title = title,
-    role = role,
+    roles = roles,
     priority = priority,
     materialCount = 0,
 )

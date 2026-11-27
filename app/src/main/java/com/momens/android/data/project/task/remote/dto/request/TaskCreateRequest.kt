@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TaskCreateRequest(
     @SerialName("title") val title: String,
-    @SerialName("role") val role: String,
+    @SerialName("roles") val roles: List<String>,
     @SerialName("priority") val priority: String,
 )

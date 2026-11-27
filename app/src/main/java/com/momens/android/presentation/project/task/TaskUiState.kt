@@ -16,7 +16,7 @@ import kotlinx.collections.immutable.toPersistentList
 @Immutable
 data class TaskUiState(
     val title: String = "",
-    val description: String = "",
+    val description: String = "여기 지워야함띠니",
     val sections: ImmutableList<TaskSectionUiModel> = persistentListOf(),
 ) {
     companion object {
@@ -49,7 +49,6 @@ data class TaskUiState(
 
         val Fake = TaskUiState(
             title = "프로젝트 태스크",
-            description = "업무를 한눈에 확인하고 상세 내용을 확인하세요.",
             sections = persistentListOf(
                 TaskSectionUiModel(type = MomensStatusEditType.TODO, tasks = fakeTasks),
                 TaskSectionUiModel(type = MomensStatusEditType.IN_PROGRESS, tasks = fakeTasks),
@@ -59,7 +58,6 @@ data class TaskUiState(
 
         val FakeEmpty = TaskUiState(
             title = "프로젝트 태스크",
-            description = "업무를 한눈에 확인하고 상세 내용을 확인하세요.",
             sections = persistentListOf(
                 TaskSectionUiModel(type = MomensStatusEditType.TODO),
                 TaskSectionUiModel(type = MomensStatusEditType.IN_PROGRESS),
@@ -71,7 +69,6 @@ data class TaskUiState(
 
 fun TaskBoard.toUiModel(): TaskUiState = TaskUiState(
     title = title,
-    description = description,
     sections = groups.map { it.toUiModel() }.toPersistentList(),
 )
 

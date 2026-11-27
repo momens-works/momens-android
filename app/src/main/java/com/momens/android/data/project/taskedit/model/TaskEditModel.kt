@@ -1,11 +1,12 @@
 package com.momens.android.data.project.taskedit.model
 
+import com.momens.android.data.project.model.toTaskRequestRoles
 import com.momens.android.data.project.taskedit.remote.dto.request.ChecklistItems
 import com.momens.android.data.project.taskedit.remote.dto.request.TaskEditRequestDto
 
 data class TaskEditModel(
     val title: String,
-    val role: String,
+    val roles: List<String>,
     val assigneeId: String?,
     val priority: String,
     val status: String,
@@ -22,12 +23,12 @@ data class ChecklistItemsModel(
 fun TaskEditModel.toRequest(): TaskEditRequestDto =
     TaskEditRequestDto(
         title = title,
-        role = role,
+        roles = roles.toTaskRequestRoles(),
         assigneeId = assigneeId,
         priority = priority,
         status = status,
         purpose = purpose,
         checklistItems = checklistItems.map {
             ChecklistItems(id = it.id, title = it.title, completed = it.completed)
-        }
+        },
     )
