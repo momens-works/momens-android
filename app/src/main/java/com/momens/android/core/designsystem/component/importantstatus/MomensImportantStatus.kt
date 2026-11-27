@@ -65,12 +65,15 @@ private fun MomensImportantStatusPreview() {
             MomensImportantStatus(level = ImportantLevel.LOW, tone = ImportantTone.GRAY)
             MomensImportantStatus(level = ImportantLevel.MEDIUM, tone = ImportantTone.GRAY)
             MomensImportantStatus(level = ImportantLevel.HIGH, tone = ImportantTone.GRAY)
+            MomensImportantStatus(level = ImportantLevel.URGENT, tone = ImportantTone.GRAY)
             MomensImportantStatus(level = ImportantLevel.LOW, tone = ImportantTone.BLUE)
             MomensImportantStatus(level = ImportantLevel.MEDIUM, tone = ImportantTone.BLUE)
             MomensImportantStatus(level = ImportantLevel.HIGH, tone = ImportantTone.BLUE)
+            MomensImportantStatus(level = ImportantLevel.URGENT, tone = ImportantTone.BLUE)
             MomensImportantStatus(level = ImportantLevel.LOW, tone = ImportantTone.WHITE)
             MomensImportantStatus(level = ImportantLevel.MEDIUM, tone = ImportantTone.WHITE)
             MomensImportantStatus(level = ImportantLevel.HIGH, tone = ImportantTone.WHITE)
+            MomensImportantStatus(level = ImportantLevel.URGENT, tone = ImportantTone.WHITE)
         }
     }
 }

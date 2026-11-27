@@ -58,7 +58,7 @@ enum class ImportantTone(
     ),
     WHITE(
         textStyle = { MomensTheme.typography.bodyM12 },
-        textColor = { MomensTheme.colors.gray600 },
+        textColor = { MomensTheme.colors.gray700 },
         background = { MomensTheme.colors.white },
     ),
 }
