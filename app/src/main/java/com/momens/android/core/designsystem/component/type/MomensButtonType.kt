@@ -9,6 +9,7 @@ enum class MomensButtonType(
     val textStyle: @Composable () -> TextStyle,
     val textColor: @Composable () -> Color,
     val background: @Composable () -> Color,
+    val isDropdown: Boolean = false,
 ) {
     PRIMARY(
         textStyle = { MomensTheme.typography.bodyB12 },
@@ -29,5 +30,17 @@ enum class MomensButtonType(
         textStyle = { MomensTheme.typography.bodyM12 },
         textColor = { MomensTheme.colors.gray500 },
         background = { MomensTheme.colors.white },
+    ),
+    PRIMARY_DROPDOWN(
+        textStyle = { MomensTheme.typography.bodyM12 },
+        textColor = { MomensTheme.colors.white },
+        background = { MomensTheme.colors.primary50 },
+        isDropdown = true,
+    ),
+    WHITE_DROPDOWN(
+        textStyle = { MomensTheme.typography.bodyM12 },
+        textColor = { MomensTheme.colors.gray800 },
+        background = { MomensTheme.colors.white },
+        isDropdown = true,
     ),
 }

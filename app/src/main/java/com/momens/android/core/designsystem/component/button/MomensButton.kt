@@ -4,13 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.momens.android.R
 import com.momens.android.core.common.extension.noRippleClickable
 import com.momens.android.core.designsystem.component.type.MomensButtonType
 import com.momens.android.core.designsystem.theme.MomensTheme
@@ -40,15 +47,31 @@ fun MomensButton(
             )
             .noRippleClickable(onClick = onClick),
     ) {
-        Text(
-            text = text,
+        Row(
             modifier = Modifier.padding(
                 horizontal = 10.dp,
                 vertical = 4.dp,
             ),
-            color = contentColor,
-            style = typographyStyle,
-        )
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = text,
+                color = contentColor,
+                style = typographyStyle,
+            )
+
+            if (buttonType.isDropdown) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_next),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .rotate(90f),
+                    tint = contentColor,
+                )
+            }
+        }
     }
 }
 
@@ -66,6 +89,8 @@ private fun MomensButtonPreview() {
             MomensButton(text = "버튼", type = MomensButtonType.PRIMARY, onClick = {})
             MomensButton(text = "버튼", type = MomensButtonType.BLACK, onClick = {})
             MomensButton(text = "버튼", type = MomensButtonType.WHITE, onClick = {})
+            MomensButton(text = "버튼", type = MomensButtonType.WHITE_DROPDOWN, onClick = {})
+            MomensButton(text = "버튼", type = MomensButtonType.PRIMARY_DROPDOWN, onClick = {})
         }
     }
 }
