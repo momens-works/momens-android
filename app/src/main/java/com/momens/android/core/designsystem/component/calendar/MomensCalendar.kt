@@ -41,7 +41,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun TaskCalendar(
+fun MomensCalendar(
     yearMonth: YearMonth,
     selectionMode: CalendarSelectionMode,
     selection: CalendarSelection,
@@ -267,13 +267,13 @@ private fun CalendarOriginalDateCellPreview() {
 
 @Preview(name = "Deadline edit", showBackground = true)
 @Composable
-private fun TaskCalendarDeadlineEditPreview() {
+private fun MomensCalendarDeadlineEditPreview() {
     var selection by remember {
         mutableStateOf<CalendarSelection>(CalendarSelection.Single(LocalDate.of(2026, 10, 13)))
     }
 
     MomensTheme {
-        TaskCalendar(
+        MomensCalendar(
             yearMonth = YearMonth.of(2026, 10),
             selectionMode = CalendarSelectionMode.SINGLE,
             selection = selection,
@@ -288,11 +288,11 @@ private fun TaskCalendarDeadlineEditPreview() {
 
 @Preview(name = "Default", showBackground = true)
 @Composable
-private fun TaskCalendarDefaultPreview() {
+private fun MomensCalendarDefaultPreview() {
     val today = remember { LocalDate.now() }
 
     MomensTheme {
-        TaskCalendar(
+        MomensCalendar(
             yearMonth = YearMonth.from(today),
             selectionMode = CalendarSelectionMode.SINGLE,
             selection = CalendarSelection.Single(today),
@@ -306,9 +306,9 @@ private fun TaskCalendarDefaultPreview() {
 
 @Preview(name = "Selected", showBackground = true)
 @Composable
-private fun TaskCalendarSelectedPreview() {
+private fun MomensCalendarSelectedPreview() {
     MomensTheme {
-        TaskCalendar(
+        MomensCalendar(
             yearMonth = YearMonth.of(2026, 10),
             selectionMode = CalendarSelectionMode.SINGLE,
             selection = CalendarSelection.Single(LocalDate.of(2026, 10, 9)),
@@ -322,9 +322,9 @@ private fun TaskCalendarSelectedPreview() {
 
 @Preview(name = "Range", showBackground = true)
 @Composable
-private fun TaskCalendarRangePreview() {
+private fun MomensCalendarRangePreview() {
     MomensTheme {
-        TaskCalendar(
+        MomensCalendar(
             yearMonth = YearMonth.of(2026, 10),
             selectionMode = CalendarSelectionMode.SINGLE,
             selection = CalendarSelection.Range(
@@ -341,13 +341,13 @@ private fun TaskCalendarRangePreview() {
 
 @Preview(name = "All states", showBackground = true, widthDp = 320, heightDp = 350)
 @Composable
-private fun TaskCalendarAllStatesPreview() {
+private fun MomensCalendarAllStatesPreview() {
     val today = remember { LocalDate.now() }
     var yearMonth by remember { mutableStateOf(YearMonth.from(today)) }
     var selection by remember { mutableStateOf<CalendarSelection>(CalendarSelection.Single(today)) }
 
     MomensTheme {
-        TaskCalendar(
+        MomensCalendar(
             yearMonth = yearMonth,
             selectionMode = CalendarSelectionMode.SINGLE,
             selection = selection,
