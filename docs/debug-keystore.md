@@ -46,7 +46,37 @@ debug.key.password=android
 Google Console 또는 Firebase에는 공용 keystore에서 나온 SHA-1 하나만 등록합니다.
 팀원별 SHA-1을 따로 등록하지 않습니다.
 
-## 4. 필요하면 앱 삭제 후 재설치
+## 4. CI 공용 keystore 설정
+
+공유받은 동일한 `momens-debug.keystore`를 Base64로 인코딩합니다.
+macOS / Linux에서는 다음 명령으로 파일을 만듭니다.
+
+```bash
+base64 < /absolute/path/momens-debug.keystore | tr -d '\n' > /tmp/momens-debug-keystore.base64
+```
+
+GitHub 저장소의 **Settings → Secrets and variables → Actions**에서
+`DEBUG_KEYSTORE_BASE64` repository secret을 만들고, 생성한 파일의 내용을 저장합니다.
+Base64 파일도 keystore와 마찬가지로 커밋하거나 로그에 출력하지 않습니다.
+
+[Momens CI](../.github/workflows/pr_checker.yml)의 build job은 이 secret을
+`$RUNNER_TEMP/momens-debug.keystore`로 복원하고 파일 권한을 `600`으로 설정합니다.
+그 경로와 공용 비밀번호·별칭을 `local.properties`에 추가해 debug APK를 서명합니다.
+secret이 없으면 기본 debug keystore로 빌드하지 않고 실패합니다.
+
+CI에서 업로드한 APK를 내려받아 Android SDK Build Tools의 `apksigner`로 확인합니다.
+`apksigner`가 PATH에 없다면 설치된 Build Tools 디렉터리의 실행 파일을 사용합니다.
+
+```bash
+apksigner verify --print-certs /absolute/path/app-debug.apk
+```
+
+출력된 인증서 SHA-1이 `signingReport`에서 확인한 공용 SHA-1과 같은지 확인합니다.
+Google Cloud의 Android OAuth 클라이언트와 Firebase Android 앱에 등록한 패키지 이름은
+`com.momens.android`, SHA-1은 이 공용 인증서 값이어야 합니다. 등록값이 다르면 공용
+SHA-1로 맞추고 CI APK에서 Google 로그인을 확인합니다.
+
+## 5. 필요하면 앱 삭제 후 재설치
 
 기존 앱이 개인 debug keystore로 설치되어 있었다면, 공용 debug keystore로 서명된
 앱이 업데이트 설치되지 않을 수 있습니다.
