@@ -41,6 +41,7 @@ import com.momens.android.core.designsystem.theme.MomensTheme
 @Composable
 fun MomensBottomSheet(
     onDismiss: () -> Unit,
+    dismissEnabled: Boolean = true,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     containerColor: Color = MomensTheme.colors.white,
@@ -53,7 +54,7 @@ fun MomensBottomSheet(
     )
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (dismissEnabled) onDismiss() },
         sheetState = sheetState,
         shape = RectangleShape,
         containerColor = Color.Transparent,
@@ -65,6 +66,7 @@ fun MomensBottomSheet(
             shape = shape,
             sheetState = sheetState,
             onDismiss = onDismiss,
+            dismissEnabled = dismissEnabled,
             modifier = modifier,
             containerColor = containerColor,
             dragHandle = dragHandle,
@@ -79,6 +81,7 @@ private fun MomensBottomSheetContent(
     shape: RoundedCornerShape,
     sheetState: SheetState,
     onDismiss: () -> Unit,
+    dismissEnabled: Boolean,
     containerColor: Color,
     modifier: Modifier = Modifier,
     dragHandle: @Composable (() -> Unit)?,
@@ -88,7 +91,7 @@ private fun MomensBottomSheetContent(
 
     Column(
         modifier = modifier
-            .dragToDismiss(sheetState = sheetState, onDismiss = onDismiss)
+            .dragToDismiss(sheetState = sheetState, onDismiss = onDismiss, dismissEnabled = dismissEnabled)
             .fillMaxWidth()
             .padding(top = 25.dp)
             .momensBottomSheetShadow(shape = shape)

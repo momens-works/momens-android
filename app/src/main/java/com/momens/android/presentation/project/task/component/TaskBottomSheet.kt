@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -29,6 +27,8 @@ import com.momens.android.core.designsystem.component.button.MomensButton
 import com.momens.android.core.designsystem.component.button.MomensCtaButton
 import com.momens.android.core.designsystem.component.importantstatus.MomensImportantStatus
 import com.momens.android.core.designsystem.component.input.MomensCountInput
+import com.momens.android.core.designsystem.component.snackbar.MomensSnackbar
+import com.momens.android.core.designsystem.component.snackbar.model.MomensSnackbarModel
 import com.momens.android.core.designsystem.component.type.ImportantLevel
 import com.momens.android.core.designsystem.component.type.ImportantTone
 import com.momens.android.core.designsystem.component.type.MomensButtonType
@@ -38,22 +38,24 @@ import com.momens.android.presentation.project.task.model.MomensTaskButtonType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskBottomSheet(
-    titleState: TextFieldState,
-    selectedRole: MomensTaskButtonType?,
-    selectedPriority: ImportantLevel?,
-    onRoleSelect: (MomensTaskButtonType) -> Unit,
-    onPrioritySelect: (ImportantLevel) -> Unit,
+    isCreatingTask: Boolean,
+    errorMessage: String?,
     onDismiss: () -> Unit,
-    onRegisterClick: () -> Unit,
+    onRegisterClick: (title: String, role: MomensTaskButtonType, priority: ImportantLevel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val titleState = rememberTextFieldState()
+    var selectedRole by remember { mutableStateOf<MomensTaskButtonType?>(null) }
+    var selectedPriority by remember { mutableStateOf<ImportantLevel?>(null) }
     val roles = MomensTaskButtonType.entries
     val priorities = ImportantLevel.entries
 
-    val isButtonEnabled = titleState.text.isNotBlank() && selectedRole != null && selectedPriority != null
+    val isButtonEnabled = titleState.text.isNotBlank() &&
+        selectedRole != null && selectedPriority != null && !isCreatingTask
 
     MomensBottomSheet(
         onDismiss = onDismiss,
+        dismissEnabled = !isCreatingTask,
         modifier = modifier,
     ) {
         LazyColumn(
@@ -121,7 +123,7 @@ fun TaskBottomSheet(
                         val isSelected = selectedRole == role
                         MomensButton(
                             text = role.text,
-                            onClick = { onRoleSelect(role) },
+                            onClick = { selectedRole = role },
                             type = if (isSelected) MomensButtonType.PRIMARY
                             else MomensButtonType.GRAY,
                         )
@@ -156,7 +158,7 @@ fun TaskBottomSheet(
                         MomensImportantStatus(
                             level = level,
                             tone = tone,
-                            modifier = Modifier.noRippleClickable { onPrioritySelect(level) },
+                            modifier = Modifier.noRippleClickable { selectedPriority = level },
                         )
                     }
                 }
@@ -168,13 +170,28 @@ fun TaskBottomSheet(
 
             item {
                 MomensCtaButton(
-                    onClick = onRegisterClick,
+                    onClick = {
+                        onRegisterClick(
+                            titleState.text.toString(),
+                            requireNotNull(selectedRole),
+                            requireNotNull(selectedPriority),
+                        )
+                    },
                     enabled = isButtonEnabled,
                 ) {
                     Text(
-                        text = "태스크 등록",
+                        text = if (isCreatingTask) "등록 중..." else "태스크 등록",
                         color = MomensTheme.colors.white,
                         style = MomensTheme.typography.bodyB16,
+                    )
+                }
+            }
+
+            if (errorMessage != null) {
+                item {
+                    MomensSnackbar(
+                        content = MomensSnackbarModel(title = errorMessage),
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
             }
@@ -188,23 +205,43 @@ fun TaskBottomSheet(
 private fun TaskBottomSheetPreview() {
     MomensTheme {
         Box(modifier = Modifier.fillMaxSize()) {
-            val dummyTitleState = rememberTextFieldState()
-
-            var previewSelectedRole by remember {
-                mutableStateOf<MomensTaskButtonType?>(null)
-            }
-            var previewSelectedPriority by remember {
-                mutableStateOf<ImportantLevel?>(null)
-            }
-
             TaskBottomSheet(
-                titleState = dummyTitleState,
-                selectedRole = previewSelectedRole,
-                onRoleSelect = { previewSelectedRole = it },
-                selectedPriority = previewSelectedPriority,
-                onPrioritySelect = { previewSelectedPriority = it },
+                isCreatingTask = false,
+                errorMessage = null,
                 onDismiss = {},
-                onRegisterClick = {},
+                onRegisterClick = { _, _, _ -> },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+private fun TaskBottomSheetErrorPreview() {
+    MomensTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            TaskBottomSheet(
+                isCreatingTask = false,
+                errorMessage = "태스크 등록에 실패했습니다",
+                onDismiss = {},
+                onRegisterClick = { _, _, _ -> },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+private fun TaskBottomSheetCreatingPreview() {
+    MomensTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            TaskBottomSheet(
+                isCreatingTask = true,
+                errorMessage = null,
+                onDismiss = {},
+                onRegisterClick = { _, _, _ -> },
             )
         }
     }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -108,6 +109,7 @@ fun Modifier.advancedImePadding(): Modifier {
 fun Modifier.dragToDismiss(
     sheetState: SheetState,
     onDismiss: () -> Unit,
+    dismissEnabled: Boolean = true,
     positionalThreshold: Dp = 56.dp,
     velocityThreshold: Dp = 125.dp,
 ): Modifier = composed {
@@ -115,12 +117,20 @@ fun Modifier.dragToDismiss(
     var dragOffsetPx by remember { mutableFloatStateOf(0f) }
     val settleOffset = remember { Animatable(0f) }
 
+    LaunchedEffect(dismissEnabled) {
+        if (!dismissEnabled) {
+            dragOffsetPx = 0f
+            settleOffset.snapTo(0f)
+        }
+    }
+
     this
         .offset {
             val y = if (settleOffset.isRunning) settleOffset.value else dragOffsetPx
             IntOffset(x = 0, y = y.roundToInt())
         }
         .draggable(
+            enabled = dismissEnabled,
             state = rememberDraggableState { delta ->
                 dragOffsetPx = (dragOffsetPx + delta).coerceAtLeast(0f)
             },
@@ -129,7 +139,7 @@ fun Modifier.dragToDismiss(
                 val positionalThresholdPx = with(density) { positionalThreshold.toPx() }
                 val velocityThresholdPx = with(density) { velocityThreshold.toPx() }
 
-                if (dragOffsetPx > positionalThresholdPx || velocity > velocityThresholdPx) {
+                if (dismissEnabled && (dragOffsetPx > positionalThresholdPx || velocity > velocityThresholdPx)) {
                     try {
                         sheetState.hide()
                     } finally {
