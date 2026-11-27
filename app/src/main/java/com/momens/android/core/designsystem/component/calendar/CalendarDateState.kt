@@ -1,9 +1,11 @@
 package com.momens.android.core.designsystem.component.calendar
 
 import java.time.LocalDate
+import java.time.YearMonth
 
 enum class CalendarDateState {
     DEFAULT,
+    PREVIOUS_MONTH,
     TODAY,
     SELECTED,
     ORIGINAL,
@@ -18,6 +20,7 @@ fun dateState(
     selection: CalendarSelection,
     disabledDates: Set<LocalDate>,
     today: LocalDate,
+    yearMonth: YearMonth,
     originalDate: LocalDate? = null,
 ): CalendarDateState {
     if (date in disabledDates) return CalendarDateState.DISABLED
@@ -37,5 +40,9 @@ fun dateState(
 
     if (date == originalDate) return CalendarDateState.ORIGINAL
 
-    return if (date == today) CalendarDateState.TODAY else CalendarDateState.DEFAULT
+    return when {
+        date == today -> CalendarDateState.TODAY
+        YearMonth.from(date).isBefore(yearMonth) -> CalendarDateState.PREVIOUS_MONTH
+        else -> CalendarDateState.DEFAULT
+    }
 }

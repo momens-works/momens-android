@@ -83,13 +83,11 @@ fun MomensCalendar(
                                 .weight(1f)
                                 .aspectRatio(1f),
                         ) {
-                            if (date != null) {
-                                CalendarDateCell(
-                                    date = date,
-                                    state = dateState(date, selection, disabledDates, today, originalDate),
-                                    onClick = { onSelectionChange(selection.selectDate(date, selectionMode)) },
-                                )
-                            }
+                            CalendarDateCell(
+                                date = date,
+                                state = dateState(date, selection, disabledDates, today, yearMonth, originalDate),
+                                onClick = { onSelectionChange(selection.selectDate(date, selectionMode)) },
+                            )
                         }
                     }
                 }
@@ -193,6 +191,7 @@ private fun CalendarDateCell(
         CalendarDateState.TODAY,
         CalendarDateState.RANGE_MIDDLE,
         CalendarDateState.DEFAULT,
+        CalendarDateState.PREVIOUS_MONTH,
         CalendarDateState.DISABLED,
             -> RectangleShape
     }
@@ -220,6 +219,7 @@ private fun CalendarDateCell(
             -> MomensTheme.colors.primary100
 
         CalendarDateState.DISABLED -> MomensTheme.colors.black.copy(alpha = 0.4f)
+        CalendarDateState.PREVIOUS_MONTH -> MomensTheme.colors.gray300
         CalendarDateState.DEFAULT -> MomensTheme.colors.black
     }
 
