@@ -17,8 +17,8 @@ data class TaskDetailResponse(
     @SerialName("status")
     val status: TaskStatusDto,
 
-    @SerialName("role")
-    val role: TaskRoleDto?,
+    @SerialName("roles")
+    val roles: List<TaskRoleDto>,
 
     @SerialName("assignee")
     val assignee: TaskAssigneeDto?,

@@ -8,8 +8,10 @@ import com.momens.android.data.project.taskedit.model.TaskEditModel
 import com.momens.android.presentation.project.model.Assignee
 import com.momens.android.presentation.project.model.TaskRole
 import com.momens.android.presentation.project.taskdetail.model.TaskDetailModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import java.util.UUID
 
@@ -23,6 +25,7 @@ data class Task(
     val priority: ImportantLevel,
     val purposeState: String,
     val checklist: PersistentList<ChecklistItemState>,
+    val originalRoles: ImmutableList<TaskRole> = listOfNotNull(role).toImmutableList(),
 ) {
     val checklistTotalCount: Int get() = checklist.size
     val checklistCompletedCount: Int get() = checklist.count { it.completed }
@@ -60,11 +63,17 @@ fun TaskDetailModel.toEditTask(): Task = Task(
             completed = it.completed,
         )
     }.toPersistentList(),
+    originalRoles = roles,
 )
 
 fun Task.toTaskEditModel(): TaskEditModel = TaskEditModel(
     title = titleState,
-    role = (role ?: TaskRole.PM).name.lowercase(),
+    // 역할을 변경하지 않은 저장에서는 서버의 복수 역할을 그대로 유지한다.
+    roles = if (role == originalRoles.firstOrNull()) {
+        originalRoles.map { it.name.lowercase() }
+    } else {
+        listOfNotNull(role?.name?.lowercase())
+    },
     assigneeId = assignee?.id,
     priority = priority.label,
     status = status.key,

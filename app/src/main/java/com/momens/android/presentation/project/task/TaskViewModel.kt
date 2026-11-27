@@ -6,14 +6,13 @@ import com.momens.android.core.common.extension.onLogFailure
 import com.momens.android.core.common.state.UiState
 import com.momens.android.core.designsystem.component.type.ImportantLevel
 import com.momens.android.core.designsystem.component.type.MomensStatusEditType
+import com.momens.android.core.local.project.ProjectManager
 import com.momens.android.data.project.task.model.TaskCreateModel
 import com.momens.android.data.project.task.repository.TaskRepository
-import com.momens.android.core.local.project.ProjectManager
 import com.momens.android.presentation.project.task.model.MomensTaskButtonType
 import com.momens.android.presentation.project.task.model.toRequestValue
 import com.momens.android.presentation.project.task.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
@@ -45,7 +45,6 @@ class TaskViewModel @Inject constructor(
     private var loadBoardJob: Job? = null
 
     fun loadTaskBoard(projectId: String) {
-
         loadBoardJob?.cancel()
 
         _uiState.value = UiState.Loading
@@ -78,7 +77,7 @@ class TaskViewModel @Inject constructor(
                 projectId = projectId,
                 task = TaskCreateModel(
                     title = title,
-                    role = role.toRequestValue(),
+                    roles = listOf(role.toRequestValue()),
                     priority = priority.toRequestValue(),
                 ),
             ).mapCatching { created -> created.toUiModel() }
