@@ -1,7 +1,9 @@
 package com.momens.android.presentation.brief.model
 
-fun BriefSignalSummaryFilterType.toApiFilter(): String? {
-    return if (this == BriefSignalSummaryFilterType.ALL) {
+import com.momens.android.core.model.signal.SignalFilterType
+
+fun SignalFilterType.toApiFilter(): String? {
+    return if (this == SignalFilterType.ALL) {
         null
     } else {
         name.lowercase()

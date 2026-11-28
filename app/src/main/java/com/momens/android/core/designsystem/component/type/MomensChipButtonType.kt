@@ -10,12 +10,12 @@ enum class MomensChipButtonType(
     val background: @Composable () -> Color,
     val textStyle: @Composable () -> TextStyle = { MomensTheme.typography.captionM10 },
 ) {
-    CLICK(
+    SELECTED(
         textColor = { MomensTheme.colors.white },
         background = { MomensTheme.colors.primary100 },
         textStyle = { MomensTheme.typography.bodyB12 },
     ),
-    DEFAULT(
+    UNSELECTED(
         textColor = { MomensTheme.colors.gray400 },
         background = { MomensTheme.colors.white },
         textStyle = { MomensTheme.typography.bodyB12 },

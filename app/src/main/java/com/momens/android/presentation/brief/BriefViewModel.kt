@@ -6,7 +6,7 @@ import com.momens.android.core.common.extension.updateSuccess
 import com.momens.android.core.common.state.UiState
 import com.momens.android.core.local.project.ProjectManager
 import com.momens.android.data.brief.repository.BriefRepository
-import com.momens.android.presentation.brief.model.BriefSignalSummaryFilterType
+import com.momens.android.core.model.signal.SignalFilterType
 import com.momens.android.presentation.brief.model.toApiFilter
 import com.momens.android.presentation.brief.model.toUiModel
 import com.momens.android.presentation.brief.state.BriefUiState
@@ -62,7 +62,7 @@ class BriefViewModel @Inject constructor(
         }
     }
 
-    fun selectSignalFilter(filterType: BriefSignalSummaryFilterType) {
+    fun selectSignalFilter(filterType: SignalFilterType) {
         val currentState = (_uiState.value as? UiState.Success)?.data ?: return
         val filter = filterType.toApiFilter()
         val requestedProjectId = currentState.project.id
