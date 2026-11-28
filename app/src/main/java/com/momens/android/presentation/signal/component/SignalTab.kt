@@ -13,15 +13,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.momens.android.core.common.extension.noRippleClickable
 import com.momens.android.core.designsystem.theme.MomensTheme
-import com.momens.android.presentation.signal.model.SignalTapType
+import com.momens.android.presentation.signal.model.SignalTabType
 
 @Composable
-fun SignalTap(
+fun SignalTab(
+    title: String,
     count: Int,
+    isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    type: SignalTapType = SignalTapType.DEFAULT,
 ) {
+    val type = if (isSelected) SignalTabType.ACTIVE else SignalTabType.DEFAULT
     val lineColor = type.lineColor()
 
     Row(
@@ -40,7 +42,7 @@ fun SignalTap(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            text = type.title,
+            text = title,
             color = type.contentColor(),
             style = type.textStyle(),
         )
@@ -55,21 +57,23 @@ fun SignalTap(
 
 @Preview(showBackground = true)
 @Composable
-private fun SignalTapPreview() {
+private fun SignalTabPreview() {
     MomensTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            SignalTap(
+            SignalTab(
+                title = "확인 필요",
                 count = 12,
+                isSelected = true,
                 onClick = {},
-                type = SignalTapType.ACTIVE,
             )
-            SignalTap(
+            SignalTab(
+                title = "검토 필요",
                 count = 1,
+                isSelected = false,
                 onClick = {},
-                type = SignalTapType.DEFAULT,
             )
         }
     }
