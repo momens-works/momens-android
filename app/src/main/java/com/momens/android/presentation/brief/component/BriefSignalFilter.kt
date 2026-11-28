@@ -17,21 +17,21 @@ import androidx.compose.ui.unit.dp
 import com.momens.android.core.designsystem.component.button.MomensChipButton
 import com.momens.android.core.designsystem.component.type.MomensChipButtonType
 import com.momens.android.core.designsystem.theme.MomensTheme
+import com.momens.android.core.model.signal.SignalFilterType
 import com.momens.android.presentation.brief.model.BriefSignalItemUiModel
 import com.momens.android.presentation.brief.model.BriefSignalSummaryFilter
-import com.momens.android.presentation.brief.model.BriefSignalSummaryFilterType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun BriefSignalFilterSummary(
-    selectedFilterType: BriefSignalSummaryFilterType,
+    selectedFilterType: SignalFilterType,
     filters: ImmutableList<BriefSignalSummaryFilter>,
     summaries: ImmutableList<BriefSignalItemUiModel>,
     hasMoreSummaries: Boolean,
     canLoadMoreSummaries: Boolean,
     isSummaryExpanded: Boolean,
-    onFilterClick: (BriefSignalSummaryFilterType) -> Unit,
+    onFilterClick: (SignalFilterType) -> Unit,
     onSummaryMoreClick: () -> Unit,
     onSummaryFoldClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -60,18 +60,18 @@ fun BriefSignalFilterSummary(
 
 @Composable
 private fun BriefSignalFilterButton(
-    selectedFilterType: BriefSignalSummaryFilterType,
+    selectedFilterType: SignalFilterType,
     filters: ImmutableList<BriefSignalSummaryFilter>,
-    onFilterClick: (BriefSignalSummaryFilterType) -> Unit,
+    onFilterClick: (SignalFilterType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val visibleFilters = filters.filter { filter ->
-        filter.type == BriefSignalSummaryFilterType.ALL || filter.count > 0
+        filter.type == SignalFilterType.ALL || filter.count > 0
     }
 
     val selectedVisibleFilterType =
         visibleFilters.find { filter -> filter.type == selectedFilterType }?.type
-            ?: BriefSignalSummaryFilterType.ALL
+            ?: SignalFilterType.ALL
 
     LazyRow(
         modifier = modifier,
@@ -82,16 +82,12 @@ private fun BriefSignalFilterButton(
             items = visibleFilters,
             key = { filter -> filter.type },
         ) { filter ->
-            val type = if (filter.type == selectedVisibleFilterType) {
-                filter.chipButtonType
-            } else {
-                MomensChipButtonType.WHITE
-            }
-
             MomensChipButton(
                 label = filter.label,
+                isSelected = filter.type == selectedVisibleFilterType,
+                selectedType = filter.chipButtonType,
+                unselectedType = MomensChipButtonType.WHITE,
                 count = filter.count,
-                type = type,
                 onClick = { onFilterClick(filter.type) },
             )
         }
@@ -102,7 +98,7 @@ private fun BriefSignalFilterButton(
 @Composable
 private fun BriefSignalSummarySectionPreview() {
     var selectedFilterType by rememberSaveable {
-        mutableStateOf(BriefSignalSummaryFilterType.ALL)
+        mutableStateOf(SignalFilterType.ALL)
     }
     var isSummaryExpanded by rememberSaveable {
         mutableStateOf(false)
@@ -110,27 +106,27 @@ private fun BriefSignalSummarySectionPreview() {
 
     val filters = persistentListOf(
         BriefSignalSummaryFilter(
-            type = BriefSignalSummaryFilterType.ALL,
+            type = SignalFilterType.ALL,
             label = "All",
             count = 0,
         ),
         BriefSignalSummaryFilter(
-            type = BriefSignalSummaryFilterType.DECISION,
+            type = SignalFilterType.DECISION,
             label = "Decision",
             count = 0,
         ),
         BriefSignalSummaryFilter(
-            type = BriefSignalSummaryFilterType.RISK,
+            type = SignalFilterType.RISK,
             label = "Risk",
             count = 1,
         ),
         BriefSignalSummaryFilter(
-            type = BriefSignalSummaryFilterType.QUESTION,
+            type = SignalFilterType.QUESTION,
             label = "Question",
             count = 2,
         ),
         BriefSignalSummaryFilter(
-            type = BriefSignalSummaryFilterType.CHANGE,
+            type = SignalFilterType.CHANGE,
             label = "Change",
             count = 1,
         ),
@@ -139,44 +135,44 @@ private fun BriefSignalSummarySectionPreview() {
     val initialSummaries = persistentListOf(
         BriefSignalItemUiModel(
             id = "6f3d8a61-4de7-4c01-9d2b-16fdf182e9a1",
-            type = BriefSignalSummaryFilterType.DECISION,
+            type = SignalFilterType.DECISION,
             title = "소셜 로그인은 MVP 범위에서 제외",
         ),
         BriefSignalItemUiModel(
             id = "27afd507-9c7f-4f0d-a2be-fcdab2477b19",
-            type = BriefSignalSummaryFilterType.DECISION,
+            type = SignalFilterType.DECISION,
             title = "회원가입 MVP 범위 1차 확정",
         ),
         BriefSignalItemUiModel(
             id = "5c1a2b34-56d7-4e89-9f01-234a5b6c7d8e",
-            type = BriefSignalSummaryFilterType.CHANGE,
+            type = SignalFilterType.CHANGE,
             title = "온보딩 문구 정책 변경",
         ),
     )
     val expandedSummaries = persistentListOf(
         BriefSignalItemUiModel(
             id = "6f3d8a61-4de7-4c01-9d2b-16fdf182e9a1",
-            type = BriefSignalSummaryFilterType.DECISION,
+            type = SignalFilterType.DECISION,
             title = "소셜 로그인은 MVP 범위에서 제외",
         ),
         BriefSignalItemUiModel(
             id = "27afd507-9c7f-4f0d-a2be-fcdab2477b19",
-            type = BriefSignalSummaryFilterType.DECISION,
+            type = SignalFilterType.DECISION,
             title = "회원가입 MVP 범위 1차 확정",
         ),
         BriefSignalItemUiModel(
             id = "5c1a2b34-56d7-4e89-9f01-234a5b6c7d8e",
-            type = BriefSignalSummaryFilterType.CHANGE,
+            type = SignalFilterType.CHANGE,
             title = "온보딩 문구 정책 변경",
         ),
         BriefSignalItemUiModel(
             id = "9d0a2b34-c678-4d90-8e12-3f4a5b6c7d8e",
-            type = BriefSignalSummaryFilterType.QUESTION,
+            type = SignalFilterType.QUESTION,
             title = "Android 13+ 권한 요청 플로우 이탈 가능성",
         ),
         BriefSignalItemUiModel(
             id = "3b9e0d12-78f4-4a56-8c01-9d2e3f4a5b6c",
-            type = BriefSignalSummaryFilterType.RISK,
+            type = SignalFilterType.RISK,
             title = "Android 13+ 권한 요청 플로우 이탈 가능성",
         ),
     )

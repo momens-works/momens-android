@@ -28,7 +28,7 @@ import com.momens.android.presentation.brief.component.BriefCurrentPriority
 import com.momens.android.presentation.brief.component.BriefSignalFilterSummary
 import com.momens.android.presentation.brief.component.BriefSignalSummary
 import com.momens.android.presentation.brief.component.BriefSummaryCard
-import com.momens.android.presentation.brief.model.BriefSignalSummaryFilterType
+import com.momens.android.core.model.signal.SignalFilterType
 import com.momens.android.presentation.brief.model.SampleBriefUiState
 import com.momens.android.presentation.brief.state.BriefUiState
 import com.momens.android.presentation.loading.LoadingScreen
@@ -75,7 +75,7 @@ private fun BriefScreen(
     bottomContentPadding: Dp,
     uiState: BriefUiState,
     avatarUrl: String?,
-    onFilterClick: (BriefSignalSummaryFilterType) -> Unit,
+    onFilterClick: (SignalFilterType) -> Unit,
     onSummaryMoreClick: () -> Unit,
     onSummaryFoldClick: () -> Unit,
     modifier: Modifier = Modifier,

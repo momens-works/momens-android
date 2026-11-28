@@ -1,9 +1,9 @@
 package com.momens.android.presentation.brief.extension
 
-import com.momens.android.presentation.brief.model.BriefSignalSummaryFilterType
+import com.momens.android.core.model.signal.SignalFilterType
 
-fun String.toFilterType(): BriefSignalSummaryFilterType {
-    return BriefSignalSummaryFilterType.entries.firstOrNull { filterType ->
+fun String.toFilterType(): SignalFilterType {
+    return SignalFilterType.entries.firstOrNull { filterType ->
         filterType.name.equals(this, ignoreCase = true)
-    } ?: BriefSignalSummaryFilterType.ALL
+    } ?: SignalFilterType.ALL
 }
